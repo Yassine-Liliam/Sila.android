@@ -246,9 +246,25 @@ Option lists (languages, tones, rules, payments) are **duplicated** from the web
 and never validates against them, so drift degrades to different suggestions, never a
 rejected save.
 
-### Phase 8 — French + Arabic
-`values-fr`, `values-ar`, RTL. Strings go into `strings.xml` from day one, so this stays one
-pass rather than a refactor. Stored and AI-bound values stay canonical English.
+### ~~Phase 8 — French + Arabic~~ ✅ *(done 2026-08-08)*
+`values-fr` and `values-ar`, complete. Putting every string in `strings.xml` from day one
+paid off exactly as intended — this was one pass, no refactor.
+
+**RTL needed no work.** Every layout already used direction-agnostic APIs (`Arrangement.End`,
+`Alignment.BottomEnd`, `padding(horizontal =)`, `RoundedCornerShape(topStart …)`), all of
+which mirror automatically, and `supportsRtl` was already set. Keep it that way: an
+`absolutePadding` or a `TextAlign.Left` anywhere would break Arabic silently.
+
+**Option chips translate their labels but keep English values.** The tones, rules and payment
+methods in Settings are stored and fed to the AI, so the value must stay canonical English —
+only the label the owner reads is localised (`optionLabel()` in `SettingsScreen.kt`, falling
+back to the raw value). Adding an option to the web wizard therefore degrades to "shows in
+English", never to a blank chip.
+
+**No in-app language switcher, on purpose.** `res/xml/locales_config.xml` + `localeConfig` in
+the manifest give the app a per-app Language entry in Android Settings (13+); below that it
+follows the system language. The platform already has the picker — the web app needs its own
+because the browser has none.
 
 ### Phase 9 — Push notifications
 FCM: new DM, new pending order. The one thing the web genuinely cannot do, and the reason an

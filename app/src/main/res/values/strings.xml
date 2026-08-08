@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Silati</string>
+    <!-- A brand name: never translated, in any locale. -->
+    <string name="app_name" translatable="false">Silati</string>
 
     <string name="nav_assistant">Assistant</string>
     <string name="nav_products">Products</string>
@@ -148,4 +149,34 @@
     <string name="loading">Loading…</string>
     <string name="retry">Retry</string>
     <string name="not_onboarded">Finish setting up your business on silati.app, then reopen the app.</string>
+
+    <!--
+      Labels for the settings option chips. The VALUES behind these stay canonical English
+      (data/Settings.kt) because they are stored and fed to the AI — only what the owner
+      reads is translated. An unmapped value falls back to showing itself.
+    -->
+    <string name="opt_lang_english">English</string>
+    <string name="opt_lang_french">French</string>
+    <string name="opt_lang_arabic">Arabic</string>
+
+    <string name="opt_tone_professional">Professional</string>
+    <string name="opt_tone_casual">Casual</string>
+    <string name="opt_tone_friendly">Friendly</string>
+
+    <string name="opt_rule_polite">Always stay polite and patient</string>
+    <string name="opt_rule_confirm">Confirm order details before closing</string>
+    <string name="opt_rule_discounts">Never promise discounts or prices not listed</string>
+    <string name="opt_rule_escalate">Escalate complaints or refunds to a human</string>
+    <string name="opt_rule_products_only">Only answer questions about our products</string>
+    <string name="opt_rule_no_opinions">Never share personal opinions</string>
+
+    <string name="opt_pay_cod">Cash on delivery</string>
+    <string name="opt_pay_transfer">Bank transfer</string>
+    <string name="opt_pay_cash">Cash</string>
+
+    <string name="opt_info_name">Full name</string>
+    <string name="opt_info_city">City</string>
+    <string name="opt_info_address">Address</string>
+    <string name="opt_info_phone">Phone number</string>
+    <string name="opt_info_email">Email address</string>
 </resources>

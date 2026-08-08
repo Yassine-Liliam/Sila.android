@@ -1,0 +1,174 @@
+<resources>
+    <!-- app_name is a brand name and stays untranslated (see values/strings.xml). -->
+
+    <string name="nav_assistant">المساعد</string>
+    <string name="nav_products">المنتجات</string>
+    <string name="nav_clients">الزبناء</string>
+    <string name="nav_conversations">المحادثات</string>
+    <string name="nav_purchases">الطلبات</string>
+    <string name="nav_deliveries">التوصيل</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <string name="open_menu">فتح القائمة</string>
+
+    <string name="sign_in_tagline">متجرك يرد على الرسائل بينما أنت نائم.</string>
+    <string name="sign_in_google">المتابعة باستخدام Google</string>
+    <string name="sign_in_failed">فشل تسجيل الدخول. حاول مرة أخرى.</string>
+    <string name="sign_in_offline">تعذّر الوصول إلى Silati. تحقّق من اتصالك.</string>
+    <string name="sign_out">تسجيل الخروج</string>
+
+    <string name="assistant_empty">كيف يمكنني المساعدة؟</string>
+    <string name="assistant_empty_hint">اسأل عن منتجاتك أو طلباتك أو عمليات التوصيل — أو أخبرني بما تريد تغييره.</string>
+    <string name="assistant_hint">رسالة</string>
+    <string name="assistant_send">إرسال</string>
+    <string name="assistant_failed">تعذّر على المساعد الرد. حاول مرة أخرى.</string>
+    <string name="assistant_tool">⚙ %1$s</string>
+
+    <string name="products_search">ابحث عن منتج</string>
+    <string name="products_empty">لا توجد منتجات بعد. اطلب من المساعد إضافة واحد.</string>
+    <string name="products_no_match">لا يوجد منتج مطابق.</string>
+    <string name="product_inactive">غير معروض للبيع</string>
+    <string name="product_inactive_explained">غير معروض للبيع — مخفي عن الزبناء وعن الذكاء الاصطناعي.</string>
+    <string name="product_stock">%1$d في المخزون</string>
+    <string name="product_stock_untracked">المخزون غير متتبَّع</string>
+    <string name="list_failed">تعذّر التحميل. حاول مرة أخرى.</string>
+
+    <string name="clients_search">ابحث عن زبون</string>
+    <string name="clients_empty">لا يوجد زبناء بعد. يُضافون عند تسجيل طلب.</string>
+    <string name="clients_no_match">لا يوجد زبون مطابق.</string>
+    <string name="client_from_instagram">من Instagram</string>
+    <string name="client_instagram_short">IG</string>
+
+    <string name="conversations_empty">لا توجد محادثات بعد. اربط Instagram على silati.app لتصلك الرسائل.</string>
+    <string name="conversation_paused">متوقّف</string>
+    <string name="conversation_you">أنت: %1$s</string>
+
+    <string name="purchases_empty">لا توجد طلبات بعد.</string>
+    <string name="purchases_no_match">لا يوجد طلب بهذه الحالة.</string>
+    <string name="purchase_pending">في الانتظار</string>
+    <string name="purchase_confirmed">مؤكَّد</string>
+    <string name="purchase_cancelled">ملغى</string>
+    <string name="source_manual">أُضيف يدويًا</string>
+    <string name="source_instagram">سُجِّل من Instagram</string>
+    <string name="source_assistant">أنشأه المساعد</string>
+
+    <string name="deliveries_empty">لا توجد عمليات توصيل بعد. تأكيد طلب يُنشئ واحدة.</string>
+    <string name="deliveries_no_match">لا توجد عملية توصيل بهذه الحالة.</string>
+    <string name="delivery_pending">في الانتظار</string>
+    <string name="delivery_in_transit">في الطريق</string>
+    <string name="delivery_delivered">تم التسليم</string>
+    <string name="delivery_failed">فشلت</string>
+    <string name="delivery_cancelled">ملغاة</string>
+
+    <string name="product_new">منتج جديد</string>
+    <string name="product_edit">تعديل المنتج</string>
+    <string name="client_new">زبون جديد</string>
+    <string name="client_edit">تعديل الزبون</string>
+    <string name="client_form_hint">يُنشأ زبناء Instagram تلقائيًا عندما يسجّل الذكاء الاصطناعي طلبًا.</string>
+
+    <string name="field_name">الاسم</string>
+    <string name="field_price">السعر</string>
+    <string name="field_price_invalid">أدخل رقمًا، 0 أو أكثر.</string>
+    <string name="field_currency">العملة</string>
+    <string name="field_stock">المخزون</string>
+    <string name="field_stock_hint">اتركه فارغًا إذا كنت لا تتتبّع المخزون.</string>
+    <string name="field_description">الوصف</string>
+    <string name="field_active">معروض للبيع</string>
+    <string name="field_active_hint">عند الإيقاف يُخفى عن الزبناء وعن الذكاء الاصطناعي، مع الحفاظ على الطلبات السابقة.</string>
+
+    <string name="settings_profile">الملف الشخصي</string>
+    <string name="settings_business">النشاط التجاري</string>
+    <string name="settings_ai">ردود الذكاء الاصطناعي</string>
+    <string name="settings_delivery">التوصيل والدفع</string>
+    <string name="settings_policies">الشروط</string>
+    <string name="settings_instagram">Instagram</string>
+    <string name="settings_danger">منطقة الخطر</string>
+    <string name="settings_language_hint">قيمة افتراضية وليست قاعدة — يرد الذكاء الاصطناعي بلغة الزبون.</string>
+
+    <string name="field_business_name">اسم النشاط التجاري</string>
+    <string name="field_sells">ما الذي تبيعه</string>
+    <string name="field_story">نبذة عن النشاط</string>
+    <string name="field_ai_language">لغة الرد الافتراضية</string>
+    <string name="field_tone">الأسلوب</string>
+    <string name="field_rules">قواعد يتبعها الذكاء الاصطناعي</string>
+    <string name="field_delivers">نقوم بالتوصيل</string>
+    <string name="field_delivery_areas">مناطق التوصيل</string>
+    <string name="field_comma_separated">افصل بينها بفواصل.</string>
+    <string name="field_pickup_address">عنوان الاستلام</string>
+    <string name="field_payment">طرق الدفع المقبولة</string>
+    <string name="field_confirm_info">ما يجب جمعه قبل تأكيد الطلب</string>
+    <string name="field_returns">قبول الإرجاع</string>
+    <string name="field_return_days">أيام الإرجاع</string>
+    <string name="field_other_policies">شروط أخرى</string>
+
+    <string name="instagram_connected">مرتبط</string>
+    <string name="instagram_not_connected">غير مرتبط. رسائل الزبناء لا تصل إلى الذكاء الاصطناعي بعد.</string>
+    <string name="instagram_connect_hint">ستُفتح صفحة Instagram للموافقة على الوصول — Meta تشترط ذلك. عد بعدها وحدِّث.</string>
+    <string name="instagram_connect">ربط Instagram</string>
+    <string name="instagram_reconnect">إعادة الربط</string>
+    <string name="action_refresh">تحديث</string>
+
+    <string name="delete_account">حذف الحساب</string>
+    <string name="delete_account_body">يحذف حسابك وكل ما فيه: النشاط التجاري والمنتجات والزبناء والطلبات وعمليات التوصيل ومحادثات Instagram.</string>
+    <string name="delete_account_warning">لا يمكن التراجع عن هذا. يُحذف كل شيء نهائيًا.</string>
+    <string name="delete_account_type">اكتب DELETE للتأكيد</string>
+
+    <string name="action_save">حفظ</string>
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_edit">تعديل</string>
+    <string name="action_confirm">تأكيد الطلب</string>
+    <string name="action_cancel_order">إلغاء الطلب</string>
+    <string name="action_back">رجوع</string>
+    <string name="action_pause_ai">إيقاف الذكاء الاصطناعي</string>
+    <string name="action_resume_ai">استئناف الذكاء الاصطناعي</string>
+    <string name="action_failed">لم ينجح ذلك. حاول مرة أخرى.</string>
+    <string name="purchase_confirm_hint">التأكيد يُنشئ عملية التوصيل، إذا كنت توصّل وكان لدى الزبون عنوان.</string>
+    <string name="purchase_cancel_body">هذا يلغي أيضًا عملية التوصيل إن وُجدت. لا يمكن التراجع من التطبيق.</string>
+    <string name="conversation_paused_hint">الذكاء الاصطناعي متوقّف. الرسائل تُسجَّل دائمًا — والاستئناف يتم مع كامل السياق.</string>
+    <string name="conversation_active_hint">الذكاء الاصطناعي يرد على هذه المحادثة. أوقفه لترد بنفسك.</string>
+    <string name="delivery_set_status">تغيير الحالة</string>
+
+    <string name="filter_all">الكل</string>
+    <string name="status_unknown">غير معروف</string>
+    <string name="unknown_client">زبون غير معروف</string>
+
+    <string name="field_phone">الهاتف</string>
+    <string name="field_email">البريد الإلكتروني</string>
+    <string name="field_address">العنوان</string>
+    <string name="field_city">المدينة</string>
+    <string name="field_notes">ملاحظات</string>
+    <string name="field_source">المصدر</string>
+    <string name="field_delivery">التوصيل</string>
+    <string name="field_scheduled">مبرمجة</string>
+    <string name="field_delivered_at">سُلّمت في</string>
+
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="not_onboarded">أكمل إعداد نشاطك التجاري على silati.app، ثم أعد فتح التطبيق.</string>
+
+    <!-- Labels only: the stored values stay English (see values/strings.xml). -->
+    <string name="opt_lang_english">الإنجليزية</string>
+    <string name="opt_lang_french">الفرنسية</string>
+    <string name="opt_lang_arabic">العربية</string>
+
+    <string name="opt_tone_professional">مهني</string>
+    <string name="opt_tone_casual">عفوي</string>
+    <string name="opt_tone_friendly">ودود</string>
+
+    <string name="opt_rule_polite">التزم دائمًا باللباقة والصبر</string>
+    <string name="opt_rule_confirm">أكّد تفاصيل الطلب قبل إنهائه</string>
+    <string name="opt_rule_discounts">لا تَعِد أبدًا بتخفيضات أو أسعار غير معلنة</string>
+    <string name="opt_rule_escalate">حوّل الشكاوى وطلبات الاسترجاع إلى شخص حقيقي</string>
+    <string name="opt_rule_products_only">أجب فقط عن الأسئلة المتعلقة بمنتجاتنا</string>
+    <string name="opt_rule_no_opinions">لا تُبدِ آراء شخصية أبدًا</string>
+
+    <string name="opt_pay_cod">الدفع عند التسليم</string>
+    <string name="opt_pay_transfer">تحويل بنكي</string>
+    <string name="opt_pay_cash">نقدًا</string>
+
+    <string name="opt_info_name">الاسم الكامل</string>
+    <string name="opt_info_city">المدينة</string>
+    <string name="opt_info_address">العنوان</string>
+    <string name="opt_info_phone">رقم الهاتف</string>
+    <string name="opt_info_email">البريد الإلكتروني</string>
+</resources>

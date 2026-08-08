@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares the languages the app ships, which is what makes Android show a per-app
+  Language entry under Settings → Apps → Silati (Android 13+).
+
+  That's the native answer to the web app's in-app language switcher: the platform already
+  has the picker, so the app doesn't build one. Below Android 13 the app simply follows the
+  system language.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fr" />
+    <locale android:name="ar" />
+</locale-config>

@@ -1,0 +1,174 @@
+<resources>
+    <!-- app_name is a brand name and stays untranslated (see values/strings.xml). -->
+
+    <string name="nav_assistant">Assistant</string>
+    <string name="nav_products">Produits</string>
+    <string name="nav_clients">Clients</string>
+    <string name="nav_conversations">Messages</string>
+    <string name="nav_purchases">Commandes</string>
+    <string name="nav_deliveries">Livraisons</string>
+    <string name="nav_settings">Réglages</string>
+
+    <string name="open_menu">Ouvrir le menu</string>
+
+    <string name="sign_in_tagline">Votre boutique répond aux messages pendant que vous dormez.</string>
+    <string name="sign_in_google">Continuer avec Google</string>
+    <string name="sign_in_failed">Échec de la connexion. Réessayez.</string>
+    <string name="sign_in_offline">Silati est injoignable. Vérifiez votre connexion.</string>
+    <string name="sign_out">Se déconnecter</string>
+
+    <string name="assistant_empty">Comment puis-je aider ?</string>
+    <string name="assistant_empty_hint">Posez une question sur vos produits, commandes ou livraisons — ou dites-moi quoi modifier.</string>
+    <string name="assistant_hint">Message</string>
+    <string name="assistant_send">Envoyer</string>
+    <string name="assistant_failed">L\'assistant n\'a pas pu répondre. Réessayez.</string>
+    <string name="assistant_tool">⚙ %1$s</string>
+
+    <string name="products_search">Rechercher un produit</string>
+    <string name="products_empty">Aucun produit. Demandez à l\'assistant d\'en ajouter un.</string>
+    <string name="products_no_match">Aucun produit ne correspond.</string>
+    <string name="product_inactive">Hors vente</string>
+    <string name="product_inactive_explained">Hors vente — invisible pour les clients et pour l\'IA.</string>
+    <string name="product_stock">%1$d en stock</string>
+    <string name="product_stock_untracked">Stock non suivi</string>
+    <string name="list_failed">Chargement impossible. Réessayez.</string>
+
+    <string name="clients_search">Rechercher un client</string>
+    <string name="clients_empty">Aucun client. Ils sont ajoutés lors de l\'enregistrement d\'une commande.</string>
+    <string name="clients_no_match">Aucun client ne correspond.</string>
+    <string name="client_from_instagram">Depuis Instagram</string>
+    <string name="client_instagram_short">IG</string>
+
+    <string name="conversations_empty">Aucune conversation. Connectez Instagram sur silati.app pour recevoir les messages.</string>
+    <string name="conversation_paused">En pause</string>
+    <string name="conversation_you">Vous : %1$s</string>
+
+    <string name="purchases_empty">Aucune commande.</string>
+    <string name="purchases_no_match">Aucune commande avec ce statut.</string>
+    <string name="purchase_pending">En attente</string>
+    <string name="purchase_confirmed">Confirmée</string>
+    <string name="purchase_cancelled">Annulée</string>
+    <string name="source_manual">Ajoutée à la main</string>
+    <string name="source_instagram">Enregistrée depuis Instagram</string>
+    <string name="source_assistant">Créée par l\'assistant</string>
+
+    <string name="deliveries_empty">Aucune livraison. Confirmer une commande en crée une.</string>
+    <string name="deliveries_no_match">Aucune livraison avec ce statut.</string>
+    <string name="delivery_pending">En attente</string>
+    <string name="delivery_in_transit">En cours</string>
+    <string name="delivery_delivered">Livrée</string>
+    <string name="delivery_failed">Échouée</string>
+    <string name="delivery_cancelled">Annulée</string>
+
+    <string name="product_new">Nouveau produit</string>
+    <string name="product_edit">Modifier le produit</string>
+    <string name="client_new">Nouveau client</string>
+    <string name="client_edit">Modifier le client</string>
+    <string name="client_form_hint">Les clients venant d\'Instagram sont créés automatiquement quand l\'IA enregistre une commande.</string>
+
+    <string name="field_name">Nom</string>
+    <string name="field_price">Prix</string>
+    <string name="field_price_invalid">Entrez un nombre, 0 ou plus.</string>
+    <string name="field_currency">Devise</string>
+    <string name="field_stock">Stock</string>
+    <string name="field_stock_hint">Laissez vide si vous ne suivez pas le stock.</string>
+    <string name="field_description">Description</string>
+    <string name="field_active">En vente</string>
+    <string name="field_active_hint">Désactivé, le produit est masqué aux clients et à l\'IA ; les commandes passées restent intactes.</string>
+
+    <string name="settings_profile">Profil</string>
+    <string name="settings_business">Entreprise</string>
+    <string name="settings_ai">Réponses de l\'IA</string>
+    <string name="settings_delivery">Livraison et paiement</string>
+    <string name="settings_policies">Conditions</string>
+    <string name="settings_instagram">Instagram</string>
+    <string name="settings_danger">Zone sensible</string>
+    <string name="settings_language_hint">Une valeur par défaut, pas une règle — l\'IA répond dans la langue du client.</string>
+
+    <string name="field_business_name">Nom de l\'entreprise</string>
+    <string name="field_sells">Ce que vous vendez</string>
+    <string name="field_story">À propos de l\'entreprise</string>
+    <string name="field_ai_language">Langue de réponse par défaut</string>
+    <string name="field_tone">Ton</string>
+    <string name="field_rules">Règles que l\'IA suit</string>
+    <string name="field_delivers">Nous livrons</string>
+    <string name="field_delivery_areas">Zones de livraison</string>
+    <string name="field_comma_separated">Séparez par des virgules.</string>
+    <string name="field_pickup_address">Adresse de retrait</string>
+    <string name="field_payment">Paiements acceptés</string>
+    <string name="field_confirm_info">À demander avant de confirmer une commande</string>
+    <string name="field_returns">Accepter les retours</string>
+    <string name="field_return_days">Jours pour retourner</string>
+    <string name="field_other_policies">Autres conditions</string>
+
+    <string name="instagram_connected">Connecté</string>
+    <string name="instagram_not_connected">Non connecté. Les messages des clients n\'atteignent pas encore l\'IA.</string>
+    <string name="instagram_connect_hint">La page d\'Instagram s\'ouvre pour autoriser l\'accès — Meta l\'exige. Revenez ensuite et actualisez.</string>
+    <string name="instagram_connect">Connecter Instagram</string>
+    <string name="instagram_reconnect">Reconnecter</string>
+    <string name="action_refresh">Actualiser</string>
+
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="delete_account_body">Supprime votre compte et tout ce qu\'il contient : entreprise, produits, clients, commandes, livraisons et conversations Instagram.</string>
+    <string name="delete_account_warning">Cette action est irréversible. Tout est supprimé définitivement.</string>
+    <string name="delete_account_type">Tapez DELETE pour confirmer</string>
+
+    <string name="action_save">Enregistrer</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_edit">Modifier</string>
+    <string name="action_confirm">Confirmer la commande</string>
+    <string name="action_cancel_order">Annuler la commande</string>
+    <string name="action_back">Retour</string>
+    <string name="action_pause_ai">Mettre l\'IA en pause</string>
+    <string name="action_resume_ai">Réactiver l\'IA</string>
+    <string name="action_failed">Cela n\'a pas fonctionné. Réessayez.</string>
+    <string name="purchase_confirm_hint">Confirmer crée la livraison, si vous livrez et que le client a une adresse.</string>
+    <string name="purchase_cancel_body">Cela annule aussi sa livraison, le cas échéant. Impossible de revenir en arrière depuis l\'application.</string>
+    <string name="conversation_paused_hint">L\'IA est en pause. Les messages sont toujours enregistrés — la reprise se fait avec tout le contexte.</string>
+    <string name="conversation_active_hint">L\'IA répond à cette conversation. Mettez-la en pause pour répondre vous-même.</string>
+    <string name="delivery_set_status">Changer le statut</string>
+
+    <string name="filter_all">Toutes</string>
+    <string name="status_unknown">Inconnu</string>
+    <string name="unknown_client">Client inconnu</string>
+
+    <string name="field_phone">Téléphone</string>
+    <string name="field_email">E-mail</string>
+    <string name="field_address">Adresse</string>
+    <string name="field_city">Ville</string>
+    <string name="field_notes">Notes</string>
+    <string name="field_source">Origine</string>
+    <string name="field_delivery">Livraison</string>
+    <string name="field_scheduled">Prévue</string>
+    <string name="field_delivered_at">Livrée le</string>
+
+    <string name="loading">Chargement…</string>
+    <string name="retry">Réessayer</string>
+    <string name="not_onboarded">Terminez la configuration de votre entreprise sur silati.app, puis rouvrez l\'application.</string>
+
+    <!-- Labels only: the stored values stay English (see values/strings.xml). -->
+    <string name="opt_lang_english">Anglais</string>
+    <string name="opt_lang_french">Français</string>
+    <string name="opt_lang_arabic">Arabe</string>
+
+    <string name="opt_tone_professional">Professionnel</string>
+    <string name="opt_tone_casual">Décontracté</string>
+    <string name="opt_tone_friendly">Amical</string>
+
+    <string name="opt_rule_polite">Toujours rester poli et patient</string>
+    <string name="opt_rule_confirm">Confirmer les détails avant de conclure</string>
+    <string name="opt_rule_discounts">Ne jamais promettre de remises ou de prix non affichés</string>
+    <string name="opt_rule_escalate">Transmettre les réclamations et remboursements à un humain</string>
+    <string name="opt_rule_products_only">Répondre uniquement sur nos produits</string>
+    <string name="opt_rule_no_opinions">Ne jamais donner d\'avis personnel</string>
+
+    <string name="opt_pay_cod">Paiement à la livraison</string>
+    <string name="opt_pay_transfer">Virement bancaire</string>
+    <string name="opt_pay_cash">Espèces</string>
+
+    <string name="opt_info_name">Nom complet</string>
+    <string name="opt_info_city">Ville</string>
+    <string name="opt_info_address">Adresse</string>
+    <string name="opt_info_phone">Numéro de téléphone</string>
+    <string name="opt_info_email">Adresse e-mail</string>
+</resources>

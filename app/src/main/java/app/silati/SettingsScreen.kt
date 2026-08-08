@@ -500,6 +500,38 @@ private fun SettingsField(
     )
 }
 
+/**
+ * The owner-facing label for an option value.
+ *
+ * The values themselves stay canonical English — they're stored and fed to the AI — so only
+ * the label is translated. An unmapped value shows itself, which is what makes adding an
+ * option to the web wizard degrade to "untranslated" rather than "blank".
+ */
+@Composable
+private fun optionLabel(value: String): String = when (value) {
+    "English" -> stringResource(R.string.opt_lang_english)
+    "French" -> stringResource(R.string.opt_lang_french)
+    "Arabic" -> stringResource(R.string.opt_lang_arabic)
+    "professional" -> stringResource(R.string.opt_tone_professional)
+    "casual" -> stringResource(R.string.opt_tone_casual)
+    "friendly" -> stringResource(R.string.opt_tone_friendly)
+    "Always stay polite and patient" -> stringResource(R.string.opt_rule_polite)
+    "Confirm order details before closing" -> stringResource(R.string.opt_rule_confirm)
+    "Never promise discounts or prices not listed" -> stringResource(R.string.opt_rule_discounts)
+    "Escalate complaints or refunds to a human" -> stringResource(R.string.opt_rule_escalate)
+    "Only answer questions about our products" -> stringResource(R.string.opt_rule_products_only)
+    "Never share personal opinions" -> stringResource(R.string.opt_rule_no_opinions)
+    "Cash on delivery" -> stringResource(R.string.opt_pay_cod)
+    "Bank transfer" -> stringResource(R.string.opt_pay_transfer)
+    "Cash" -> stringResource(R.string.opt_pay_cash)
+    "Full name" -> stringResource(R.string.opt_info_name)
+    "City" -> stringResource(R.string.opt_info_city)
+    "Address" -> stringResource(R.string.opt_info_address)
+    "Phone number" -> stringResource(R.string.opt_info_phone)
+    "Email address" -> stringResource(R.string.opt_info_email)
+    else -> value
+}
+
 /** Single-select chips. */
 @Composable
 private fun ChoiceRow(
@@ -518,7 +550,7 @@ private fun ChoiceRow(
             FilterChip(
                 selected = selected.equals(it, ignoreCase = true),
                 onClick = { onSelect(it) },
-                label = { Text(it) },
+                label = { Text(optionLabel(it)) },
             )
         }
     }
@@ -543,7 +575,7 @@ private fun MultiChoice(
             FilterChip(
                 selected = it in selected,
                 onClick = { onToggle(it) },
-                label = { Text(it) },
+                label = { Text(optionLabel(it)) },
             )
         }
     }
