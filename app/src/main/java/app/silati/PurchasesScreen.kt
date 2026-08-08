@@ -41,6 +41,8 @@ import app.silati.ui.SheetActions
 import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
+import app.silati.ui.dateTime
+import app.silati.ui.relativeTime
 import app.silati.ui.rememberSheetActionState
 import kotlinx.coroutines.launch
 
@@ -116,6 +118,7 @@ fun PurchasesScreen(
                     }
                 }
                 HorizontalDivider()
+                DetailLine(stringResource(R.string.field_placed), dateTime(purchase.createdAt))
                 DetailLine(stringResource(R.string.field_source), sourceLabel(purchase.source))
                 DetailLine(stringResource(R.string.field_notes), purchase.notes)
                 purchase.delivery?.let {
@@ -245,6 +248,15 @@ private fun PurchaseRow(purchase: Purchase, onClick: () -> Unit) {
                     text = stringResource(purchaseStatusLabel(purchase.status)),
                     tone = purchaseTone(purchase.status),
                 )
+                // How recent matters more than the exact minute when scanning a list.
+                relativeTime(purchase.createdAt)?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

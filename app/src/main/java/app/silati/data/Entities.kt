@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 // The read models behind Clients, Conversations, Purchases and Deliveries.
 //
 // Money is always a String, straight from the database Decimal — see the note on Product.
-// Timestamps are ISO-8601 strings and stay that way: nothing here formats dates yet, and
-// parsing them into java.time only to print them back would be work with no reader.
-// ponytail: format timestamps for display when a screen actually shows one.
+// Timestamps stay ISO-8601 strings on the way in and are parsed only where they're shown
+// (ui/DateFormat.kt): the app displays dates, it never does arithmetic on them, so keeping
+// them as strings costs nothing and keeps the wire types dumb.
 
 // ── Clients ─────────────────────────────────────────────────────────────────
 

@@ -270,8 +270,84 @@ because the browser has none.
 FCM: new DM, new pending order. The one thing the web genuinely cannot do, and the reason an
 owner keeps the app installed.
 
-### Phase 10 — Play Store
+### Phase 10 — Visual design
+
+The app has no considered design of its own yet — it is stock Material 3 defaults, which is
+*correct* but not *designed*. Every screen was built to work; none was built to look like
+anything. This is the pass that decides what Silati looks like on Android.
+
+The stance from the top of this README still binds: **it stays a Material 3 app with dynamic
+colour, and none of the web's dark-glass identity comes across.** Design here means making
+deliberate choices inside the platform's grammar, not decorating on top of it.
+
+What that covers:
+- **Colour** — the theme is a cyan seed and otherwise untouched. Decide what the seed should
+  be, how dynamic colour is allowed to override it, and what the app looks like when it does.
+  Check dark theme, which nothing has been designed against.
+- **Typography** — the default Material scale everywhere. Decide the actual hierarchy: what a
+  screen title is, what a row title is, what secondary text is, and stick to it.
+- **Iconography** — currently stock `Icons.Default.*` picked by name (a shopping cart for
+  products, a map pin for deliveries). Fine as placeholders, not a set.
+- **Motion** — there is none beyond default ripples. Sheet and screen transitions, and what
+  happens when a list item changes after a write.
+- **The launcher icon and app identity** — still the default green Android robot.
+- **Empty-state art** — see Phase 11; the illustration question belongs here, the copy there.
+
+*Do this before Phase 11:* polish refines an established design, and refining defaults means
+doing the work twice.
+
+### Phase 11 — Polish
+
+Not a feature phase: everything here works, it just doesn't feel finished. This is the detail
+pass over whatever Phase 10 settles.
+
+Whatever the design pass decides, these stay true — they're about states, hierarchy, copy and
+correctness rather than looks.
+
+**Done**
+- ~~Dates and timestamps~~ ✅ 2026-08-08. Detail sheets showed raw ISO strings; lists showed
+  no dates at all. Now `ui/DateFormat.kt`: relative times in rows (platform-localised via
+  `DateUtils`), absolute date+time in sheets.
+
+**First impressions** — the two screens a new owner sees before anything else
+- **Sign-in** is a title, one line and a button. No illustration, no sense of what the app is.
+- **Assistant empty state** is bare text. Suggested first prompts ("What did I sell today?")
+  would both fill the space and teach what the assistant can do.
+
+**States**
+- Empty states are text-only everywhere — no icon, no action. Products even says "ask the
+  assistant" while a perfectly good **+** button sits in the corner.
+- Loading is a centred spinner on every list; skeleton rows would stop the layout jumping.
+- Errors are inline text. A snackbar with a Retry action is the Material pattern and would
+  make `PagedList`, the sheets and the forms behave the same way.
+- **No pull-to-refresh** on any list, which is the gesture people reach for first.
+
+**Lists and rows**
+- Rows are flat: name and secondary line are nearly the same weight, so nothing anchors the
+  eye. Products has a thumbnail; the others have nothing on the leading edge (an avatar
+  initial for clients, a status dot for deliveries).
+- A write action re-fetches from page one, so **scroll position is lost** after confirming an
+  order far down the list (`reloadKey` in `ui/PagedList.kt`).
+
+**Gaps that read as bugs**
+- **No product image picker**, so a photo can only be set from the web. Both API routes
+  already accept `image: { data, mediaType }` — it needs `PickVisualMedia` and base64.
+- The assistant conversation **survives navigation but not rotation** (`MainActivity`).
+- Still the **default Android launcher icon** (also on the Phase 10 list).
+
+**Accessibility**
+- Product images pass `contentDescription = null`; decorative is arguable for a thumbnail,
+  wrong for the detail sheet's hero image.
+- Status colours in `StatusChip` are hardcoded hex and unchecked for contrast against dark
+  theme and dynamic colour — the one place where "it survives dynamic colour" was chosen over
+  "it matches the scheme". Phase 10 should decide whether that call still stands.
+- Nothing has been run through TalkBack or a large-font setting.
+
+### Phase 12 — Play Store
 Signing key, app icon, privacy-policy link, screenshots, listing.
+
+*Last on purpose:* the listing is screenshots of the screens Phases 10 and 11 produce, and
+the signing key is the one thing that can't be changed afterwards.
 
 ---
 

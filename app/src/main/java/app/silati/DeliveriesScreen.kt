@@ -34,6 +34,8 @@ import app.silati.ui.PagedList
 import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
+import app.silati.ui.dateTime
+import app.silati.ui.relativeTime
 import app.silati.ui.rememberSheetActionState
 import kotlinx.coroutines.launch
 
@@ -101,8 +103,12 @@ fun DeliveriesScreen(
                 }
                 DetailLine(stringResource(R.string.field_address), delivery.where)
                 DetailLine(stringResource(R.string.field_phone), delivery.phone)
-                DetailLine(stringResource(R.string.field_scheduled), delivery.scheduledAt)
-                DetailLine(stringResource(R.string.field_delivered_at), delivery.deliveredAt)
+                DetailLine(stringResource(R.string.field_created), dateTime(delivery.createdAt))
+                DetailLine(stringResource(R.string.field_scheduled), dateTime(delivery.scheduledAt))
+                DetailLine(
+                    stringResource(R.string.field_delivered_at),
+                    dateTime(delivery.deliveredAt),
+                )
                 DetailLine(stringResource(R.string.field_notes), delivery.notes)
                 DeliveryActions(
                     delivery = delivery,
@@ -192,10 +198,22 @@ private fun DeliveryRow(delivery: Delivery, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            StatusChip(
-                text = stringResource(deliveryStatusLabel(delivery.status)),
-                tone = deliveryTone(delivery.status),
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                StatusChip(
+                    text = stringResource(deliveryStatusLabel(delivery.status)),
+                    tone = deliveryTone(delivery.status),
+                )
+                // Delivered date once it's done, otherwise when it was created — whichever
+                // answers "is this still waiting on me?".
+                relativeTime(delivery.deliveredAt ?: delivery.createdAt)?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }

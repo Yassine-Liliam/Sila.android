@@ -47,6 +47,7 @@ import app.silati.ui.SheetActions
 import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
+import app.silati.ui.relativeTime
 import app.silati.ui.rememberSheetActionState
 import kotlinx.coroutines.launch
 
@@ -133,8 +134,18 @@ private fun ConversationRow(conversation: ConversationSummary, onClick: () -> Un
                     )
                 }
             }
-            if (conversation.paused) {
-                StatusChip(stringResource(R.string.conversation_paused), Tone.Pending)
+            Column(horizontalAlignment = Alignment.End) {
+                if (conversation.paused) {
+                    StatusChip(stringResource(R.string.conversation_paused), Tone.Pending)
+                }
+                relativeTime(conversation.lastMessage?.sentAt)?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
@@ -271,9 +282,9 @@ private fun ThreadSheet(
 @Composable
 private fun MessageBubble(message: ThreadMessage) {
     val fromUs = message.fromBusiness
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (fromUs) Arrangement.End else Arrangement.Start,
+        horizontalAlignment = if (fromUs) Alignment.End else Alignment.Start,
     ) {
         Surface(
             color = if (fromUs) {
@@ -290,6 +301,14 @@ private fun MessageBubble(message: ThreadMessage) {
                 text = message.text.orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+        }
+        relativeTime(message.sentAt)?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
             )
         }
     }

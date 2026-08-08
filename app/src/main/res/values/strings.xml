@@ -145,6 +145,9 @@
     <string name="field_delivery">Delivery</string>
     <string name="field_scheduled">Scheduled</string>
     <string name="field_delivered_at">Delivered</string>
+    <string name="field_placed">Placed</string>
+    <string name="field_created">Created</string>
+    <string name="field_client_since">Client since</string>
 
     <string name="loading">Loading…</string>
     <string name="retry">Retry</string>

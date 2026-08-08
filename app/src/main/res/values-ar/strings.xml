@@ -141,6 +141,9 @@
     <string name="field_delivery">التوصيل</string>
     <string name="field_scheduled">مبرمجة</string>
     <string name="field_delivered_at">سُلّمت في</string>
+    <string name="field_placed">تاريخ الطلب</string>
+    <string name="field_created">تاريخ الإنشاء</string>
+    <string name="field_client_since">زبون منذ</string>
 
     <string name="loading">جارٍ التحميل…</string>
     <string name="retry">إعادة المحاولة</string>

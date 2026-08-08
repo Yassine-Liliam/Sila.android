@@ -141,6 +141,9 @@
     <string name="field_delivery">Livraison</string>
     <string name="field_scheduled">Prévue</string>
     <string name="field_delivered_at">Livrée le</string>
+    <string name="field_placed">Passée le</string>
+    <string name="field_created">Créée le</string>
+    <string name="field_client_since">Client depuis</string>
 
     <string name="loading">Chargement…</string>
     <string name="retry">Réessayer</string>

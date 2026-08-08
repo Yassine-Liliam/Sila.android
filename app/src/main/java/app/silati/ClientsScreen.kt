@@ -31,6 +31,7 @@ import app.silati.ui.PagedList
 import app.silati.ui.SheetActions
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
+import app.silati.ui.date
 
 /** The customer list. Read-only in Phase 5. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +103,7 @@ fun ClientsScreen(
                 DetailLine(stringResource(R.string.field_address), client.address)
                 DetailLine(stringResource(R.string.field_city), client.city)
                 DetailLine(stringResource(R.string.field_notes), client.notes)
+                DetailLine(stringResource(R.string.field_client_since), date(client.createdAt))
                 SheetActions {
                     Button(
                         onClick = {
