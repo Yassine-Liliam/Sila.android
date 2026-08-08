@@ -91,8 +91,12 @@ All behind one Bearer check, each reusing `lib/ai-tools.ts`, `lib/business.ts` a
   calls shown as muted `⚙ name` lines. The conversation is hoisted above the drawer, so
   switching destinations keeps it; a relaunch starts fresh.
 
-`auth/google`, `me` and `chat` are wired. The other six destinations are still placeholders,
-and **onboarding (Phase 3) was skipped** — a brand-new owner still has to start on the web.
+- **Read screens** — Products, Clients, Chats, Purchases, Deliveries all list, paginate and
+  open a detail sheet. Purchases and Deliveries filter by status; Products and Clients search.
+
+Every screen except Settings is wired. Still missing: **write actions** (Phase 6 — confirm /
+cancel an order, pause a conversation, edit a product), **Settings**, and **onboarding
+(Phase 3, skipped)** — a brand-new owner still has to start on the web.
 
 ## Known issues
 
@@ -165,9 +169,17 @@ format already carries them — it needs a picker and base64, not a protocol cha
 *The app is already useful from here* — the assistant can do everything the entity screens
 will later do by hand. Phases 5–6 are the long tail.
 
-### Phase 5 — Read screens
-Products, Clients, Conversations, Purchases, Deliveries — lists and detail. Adds Coil for
-product images.
+### ~~Phase 5 — Read screens~~ ✅ *(done 2026-08-08)*
+All five: lists with cursor pagination, detail as a bottom sheet, Coil for product images.
+
+The shape worth keeping: every list route returns the same `Page<T>` envelope, so one
+generic wire type and one `ui/PagedList.kt` composable carry all five screens — first page,
+next page as the end scrolls into view, debounced filter, and the loading / empty / error /
+retry states. A screen is then a filter control plus a row composable.
+
+Detail is a bottom sheet, not a destination: the list response already carries every field,
+so opening one costs no request and needs no back stack. **Phase 6 is where that stops being
+true** — an edit form wants real navigation, and that is the moment to add navigation-compose.
 
 ### Phase 6 — Write actions
 Confirm/cancel a purchase, pause/resume a conversation, create/edit products, update delivery
@@ -226,6 +238,11 @@ For a physical phone: Settings → About phone → Software information → tap 
 | `app/src/main/java/app/silati/AssistantScreen.kt` | The assistant chat: bubbles, tool lines, composer. |
 | `app/src/main/java/app/silati/data/Api.kt` | Retrofit service + wire types, and the OkHttp timeouts. Optional fields carry defaults and unknown keys are ignored, so a backend change can't crash the app. |
 | `app/src/main/java/app/silati/data/Chat.kt` | Chat wire types (content stays raw JSON) and the flattening into displayable items. |
+| `app/src/main/java/app/silati/data/Paging.kt` | `Page<T>` — the envelope every list route returns. |
+| `app/src/main/java/app/silati/data/Entities.kt` | Client / Conversation / Purchase / Delivery read models + repositories. |
+| `app/src/main/java/app/silati/data/Repos.kt` | All repositories, built once and passed down (no DI framework). |
+| `app/src/main/java/app/silati/ui/PagedList.kt` | The list machinery all five screens share, plus `StatusChip`. |
+| `app/src/main/java/app/silati/{Products,Clients,Conversations,Purchases,Deliveries}Screen.kt` | The five entity screens. Shared row/sheet furniture lives in `ProductsScreen.kt`. |
 | `app/src/main/java/app/silati/data/Session.kt` | Owns the token; exchanges the Google ID token, restores on launch, maps failures to offline / signed-out / failed. |
 | `app/src/main/java/app/silati/data/TokenStore.kt` | Session token at rest: AES-256-GCM with the key in Android Keystore. |
 | `app/src/main/java/app/silati/ui/theme/` | Material 3 theme — dynamic color on 12+, cyan-seeded fallback below. |

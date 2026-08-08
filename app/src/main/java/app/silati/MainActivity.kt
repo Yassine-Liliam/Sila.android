@@ -57,7 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.silati.data.ChatMessage
-import app.silati.data.ChatRepository
+import app.silati.data.Repos
 import app.silati.data.Session
 import app.silati.data.SessionError
 import app.silati.data.SessionRepository
@@ -98,7 +98,7 @@ private fun SilatiRoot(sessions: SessionRepository) {
     var attempt by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val chats = remember { ChatRepository(context.applicationContext) }
+    val repos = remember { Repos(context.applicationContext) }
 
     // Held here, above the drawer's destination switch, so leaving the assistant for another
     // screen and coming back keeps the conversation.
@@ -147,7 +147,7 @@ private fun SilatiRoot(sessions: SessionRepository) {
                 chatMessages = emptyList()
                 state = UiState.SignedOut
             },
-            chats = chats,
+            repos = repos,
             chatMessages = chatMessages,
             onChatMessagesChange = { chatMessages = it },
         )
@@ -215,7 +215,7 @@ fun SilatiApp(
     session: Session? = null,
     onSignOut: () -> Unit = {},
     onSignedOut: () -> Unit = {},
-    chats: ChatRepository? = null,
+    repos: Repos? = null,
     chatMessages: List<ChatMessage> = emptyList(),
     onChatMessagesChange: (List<ChatMessage>) -> Unit = {},
 ) {
@@ -293,10 +293,40 @@ fun SilatiApp(
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Assistant && chats != null -> AssistantScreen(
+                current == Dest.Assistant && repos != null -> AssistantScreen(
                     messages = chatMessages,
                     onMessagesChange = onChatMessagesChange,
-                    chats = chats,
+                    chats = repos.chat,
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.padding(innerPadding),
+                )
+
+                current == Dest.Products && repos != null -> ProductsScreen(
+                    products = repos.products,
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.padding(innerPadding),
+                )
+
+                current == Dest.Clients && repos != null -> ClientsScreen(
+                    clients = repos.clients,
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.padding(innerPadding),
+                )
+
+                current == Dest.Conversations && repos != null -> ConversationsScreen(
+                    conversations = repos.conversations,
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.padding(innerPadding),
+                )
+
+                current == Dest.Purchases && repos != null -> PurchasesScreen(
+                    purchases = repos.purchases,
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.padding(innerPadding),
+                )
+
+                current == Dest.Deliveries && repos != null -> DeliveriesScreen(
+                    deliveries = repos.deliveries,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )

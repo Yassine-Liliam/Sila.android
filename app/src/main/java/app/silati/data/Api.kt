@@ -12,6 +12,8 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
 /**
@@ -40,6 +42,51 @@ interface SilatiApi {
         @Header("Authorization") bearer: String,
         @Body body: ChatRequest,
     ): ChatResponse
+
+    // Lists. A null query param is left off the request entirely, so the backend applies
+    // its own defaults (limit 50, no filter).
+
+    @GET("api/mobile/products")
+    suspend fun products(
+        @Header("Authorization") bearer: String,
+        @Query("cursor") cursor: String? = null,
+        @Query("search") search: String? = null,
+    ): Page<Product>
+
+    @GET("api/mobile/clients")
+    suspend fun clients(
+        @Header("Authorization") bearer: String,
+        @Query("cursor") cursor: String? = null,
+        @Query("search") search: String? = null,
+    ): Page<Client>
+
+    @GET("api/mobile/conversations")
+    suspend fun conversations(
+        @Header("Authorization") bearer: String,
+        @Query("cursor") cursor: String? = null,
+    ): Page<ConversationSummary>
+
+    /** One DM thread: the conversation plus a page of its messages, newest first. */
+    @GET("api/mobile/conversations/{id}")
+    suspend fun conversation(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+        @Query("cursor") cursor: String? = null,
+    ): ConversationThread
+
+    @GET("api/mobile/purchases")
+    suspend fun purchases(
+        @Header("Authorization") bearer: String,
+        @Query("cursor") cursor: String? = null,
+        @Query("status") status: String? = null,
+    ): Page<Purchase>
+
+    @GET("api/mobile/deliveries")
+    suspend fun deliveries(
+        @Header("Authorization") bearer: String,
+        @Query("cursor") cursor: String? = null,
+        @Query("status") status: String? = null,
+    ): Page<Delivery>
 }
 
 // ── Wire types ──────────────────────────────────────────────────────────────

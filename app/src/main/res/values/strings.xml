@@ -25,6 +25,58 @@
     <!-- %1$s is a tool name, e.g. list_products -->
     <string name="assistant_tool">⚙ %1$s</string>
 
+    <string name="products_search">Search products</string>
+    <string name="products_empty">No products yet. Ask the assistant to add one.</string>
+    <string name="products_no_match">No product matches that search.</string>
+    <string name="product_inactive">Not for sale</string>
+    <string name="product_inactive_explained">Not for sale — hidden from customers and the AI.</string>
+    <!-- %1$d is a unit count -->
+    <string name="product_stock">%1$d in stock</string>
+    <string name="product_stock_untracked">Stock not tracked</string>
+    <string name="list_failed">Couldn\'t load. Try again.</string>
+
+    <string name="clients_search">Search clients</string>
+    <string name="clients_empty">No clients yet. They\'re added when an order is recorded.</string>
+    <string name="clients_no_match">No client matches that search.</string>
+    <string name="client_from_instagram">From Instagram</string>
+    <string name="client_instagram_short">IG</string>
+
+    <string name="conversations_empty">No conversations yet. Connect Instagram on silati.app to start receiving DMs.</string>
+    <string name="conversation_paused">Paused</string>
+    <!-- %1$s is the message text, prefixed to mark replies sent by the business -->
+    <string name="conversation_you">You: %1$s</string>
+
+    <string name="purchases_empty">No orders yet.</string>
+    <string name="purchases_no_match">No order with that status.</string>
+    <string name="purchase_pending">Pending</string>
+    <string name="purchase_confirmed">Confirmed</string>
+    <string name="purchase_cancelled">Cancelled</string>
+    <string name="source_manual">Added by hand</string>
+    <string name="source_instagram">Recorded from Instagram</string>
+    <string name="source_assistant">Created by the assistant</string>
+
+    <string name="deliveries_empty">No deliveries yet. Confirming an order creates one.</string>
+    <string name="deliveries_no_match">No delivery with that status.</string>
+    <string name="delivery_pending">Pending</string>
+    <string name="delivery_in_transit">In transit</string>
+    <string name="delivery_delivered">Delivered</string>
+    <string name="delivery_failed">Failed</string>
+    <string name="delivery_cancelled">Cancelled</string>
+
+    <string name="filter_all">All</string>
+    <string name="status_unknown">Unknown</string>
+    <string name="unknown_client">Unknown client</string>
+
+    <string name="field_phone">Phone</string>
+    <string name="field_email">Email</string>
+    <string name="field_address">Address</string>
+    <string name="field_city">City</string>
+    <string name="field_notes">Notes</string>
+    <string name="field_source">Source</string>
+    <string name="field_delivery">Delivery</string>
+    <string name="field_scheduled">Scheduled</string>
+    <string name="field_delivered_at">Delivered</string>
+
     <string name="loading">Loading…</string>
     <string name="retry">Retry</string>
     <string name="not_onboarded">Finish setting up your business on silati.app, then reopen the app.</string>
