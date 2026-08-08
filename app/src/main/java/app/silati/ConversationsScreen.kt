@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -25,8 +26,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,9 +41,14 @@ import androidx.compose.ui.unit.dp
 import app.silati.data.ConversationRepository
 import app.silati.data.ConversationSummary
 import app.silati.data.ThreadMessage
+import app.silati.ui.ButtonSpinner
 import app.silati.ui.PagedList
+import app.silati.ui.SheetActions
+import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
+import app.silati.ui.rememberSheetActionState
+import kotlinx.coroutines.launch
 
 /**
  * Instagram DM threads.
@@ -61,6 +69,7 @@ fun ConversationsScreen(
     modifier: Modifier = Modifier,
 ) {
     var selected by remember { mutableStateOf<ConversationSummary?>(null) }
+    var reloadKey by remember { mutableIntStateOf(0) }
 
     PagedList(
         filter = "",
@@ -71,6 +80,7 @@ fun ConversationsScreen(
         emptyText = stringResource(R.string.conversations_empty),
         onSignedOut = onSignedOut,
         modifier = modifier,
+        reloadKey = reloadKey,
     ) { conversation ->
         ConversationRow(conversation) { selected = conversation }
     }
@@ -80,7 +90,15 @@ fun ConversationsScreen(
             onDismissRequest = { selected = null },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         ) {
-            ThreadSheet(conversation, conversations, onSignedOut)
+            ThreadSheet(
+                conversation = conversation,
+                conversations = conversations,
+                onSignedOut = onSignedOut,
+                onToggled = {
+                    selected = null
+                    reloadKey++
+                },
+            )
         }
     }
 }
@@ -128,9 +146,14 @@ private fun ThreadSheet(
     conversation: ConversationSummary,
     conversations: ConversationRepository,
     onSignedOut: () -> Unit,
+    onToggled: () -> Unit,
 ) {
     var messages by remember { mutableStateOf<List<ThreadMessage>?>(null) }
     var failed by remember { mutableStateOf(false) }
+    val action = rememberSheetActionState()
+    val scope = rememberCoroutineScope()
+    val failedText = stringResource(R.string.action_failed)
+    val offlineText = stringResource(R.string.sign_in_offline)
 
     LaunchedEffect(conversation.id) {
         runCatching { conversations.thread(conversation.id) }
@@ -187,6 +210,59 @@ private fun ThreadSheet(
             ) {
                 items(messages!!, key = { it.id }) { MessageBubble(it) }
             }
+        }
+
+        // Human takeover. Paused stops the AI replying while the webhook keeps recording, so
+        // resuming picks the conversation back up with full context.
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            SheetActions {
+                Button(
+                    onClick = {
+                        action.busy = true
+                        action.error = null
+                        scope.launch {
+                            runCatching {
+                                conversations.setPaused(conversation.id, !conversation.paused)
+                            }
+                                .onSuccess { onToggled() }
+                                .onFailure { failure ->
+                                    when (failure) {
+                                        is app.silati.data.SessionError.SignedOut -> onSignedOut()
+                                        is app.silati.data.SessionError.Offline ->
+                                            action.error = offlineText
+                                        is app.silati.data.SessionError.Failed ->
+                                            action.error = failure.detail ?: failedText
+                                        else -> action.error = failedText
+                                    }
+                                }
+                            action.busy = false
+                        }
+                    },
+                    enabled = !action.busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    if (action.busy) {
+                        ButtonSpinner()
+                    } else {
+                        Text(
+                            stringResource(
+                                if (conversation.paused) R.string.action_resume_ai
+                                else R.string.action_pause_ai
+                            )
+                        )
+                    }
+                }
+            }
+            SheetError(action.error)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(
+                    if (conversation.paused) R.string.conversation_paused_hint
+                    else R.string.conversation_active_hint
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         Spacer(Modifier.height(24.dp))
     }

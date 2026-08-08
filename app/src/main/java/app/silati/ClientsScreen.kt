@@ -1,11 +1,13 @@
 package app.silati
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -13,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import app.silati.data.Client
 import app.silati.data.ClientRepository
 import app.silati.ui.PagedList
+import app.silati.ui.SheetActions
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
 
@@ -38,23 +42,48 @@ fun ClientsScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<Client?>(null) }
+    var reloadKey by remember { mutableIntStateOf(0) }
+    var editing by remember { mutableStateOf<Editing<Client>?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        SearchField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = stringResource(R.string.clients_search),
-        )
-        PagedList(
-            filter = query,
-            load = { cursor, search -> clients.page(cursor, search) },
-            itemKey = { it.id },
-            emptyText = stringResource(R.string.clients_empty),
-            emptyTextWhenFiltered = stringResource(R.string.clients_no_match),
+    editing?.let { target ->
+        ClientForm(
+            initial = target.value,
+            clients = clients,
+            onSaved = {
+                editing = null
+                reloadKey++
+            },
+            onCancel = { editing = null },
             onSignedOut = onSignedOut,
-        ) { client ->
-            ClientRow(client) { selected = client }
+            modifier = modifier,
+        )
+        return
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            SearchField(
+                value = query,
+                onValueChange = { query = it },
+                placeholder = stringResource(R.string.clients_search),
+            )
+            PagedList(
+                filter = query,
+                load = { cursor, search -> clients.page(cursor, search) },
+                itemKey = { it.id },
+                emptyText = stringResource(R.string.clients_empty),
+                emptyTextWhenFiltered = stringResource(R.string.clients_no_match),
+                onSignedOut = onSignedOut,
+                reloadKey = reloadKey,
+            ) { client ->
+                ClientRow(client) { selected = client }
+            }
         }
+        AddButton(
+            description = stringResource(R.string.client_new),
+            onClick = { editing = Editing(null) },
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 
     selected?.let { client ->
@@ -73,6 +102,15 @@ fun ClientsScreen(
                 DetailLine(stringResource(R.string.field_address), client.address)
                 DetailLine(stringResource(R.string.field_city), client.city)
                 DetailLine(stringResource(R.string.field_notes), client.notes)
+                SheetActions {
+                    Button(
+                        onClick = {
+                            selected = null
+                            editing = Editing(client)
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) { Text(stringResource(R.string.action_edit)) }
+                }
             }
         }
     }

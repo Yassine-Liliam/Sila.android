@@ -13,8 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -24,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,6 +43,7 @@ import app.silati.data.Product
 import app.silati.data.ProductRepository
 import app.silati.data.absoluteUrl
 import app.silati.ui.PagedList
+import app.silati.ui.SheetActions
 import coil3.compose.AsyncImage
 
 /**
@@ -58,23 +63,50 @@ fun ProductsScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<Product?>(null) }
+    var reloadKey by remember { mutableIntStateOf(0) }
+    // null = list; Editing(null) = create; Editing(p) = edit. A full-screen state, not a
+    // navigation destination — see the note at the top of Forms.kt.
+    var editing by remember { mutableStateOf<Editing<Product>?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        SearchField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = stringResource(R.string.products_search),
-        )
-        PagedList(
-            filter = query,
-            load = { cursor, search -> products.page(cursor, search) },
-            itemKey = { it.id },
-            emptyText = stringResource(R.string.products_empty),
-            emptyTextWhenFiltered = stringResource(R.string.products_no_match),
+    editing?.let { target ->
+        ProductForm(
+            initial = target.value,
+            products = products,
+            onSaved = {
+                editing = null
+                reloadKey++
+            },
+            onCancel = { editing = null },
             onSignedOut = onSignedOut,
-        ) { product ->
-            ProductRow(product) { selected = product }
+            modifier = modifier,
+        )
+        return
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            SearchField(
+                value = query,
+                onValueChange = { query = it },
+                placeholder = stringResource(R.string.products_search),
+            )
+            PagedList(
+                filter = query,
+                load = { cursor, search -> products.page(cursor, search) },
+                itemKey = { it.id },
+                emptyText = stringResource(R.string.products_empty),
+                emptyTextWhenFiltered = stringResource(R.string.products_no_match),
+                onSignedOut = onSignedOut,
+                reloadKey = reloadKey,
+            ) { product ->
+                ProductRow(product) { selected = product }
+            }
         }
+        AddButton(
+            description = stringResource(R.string.product_new),
+            onClick = { editing = Editing(null) },
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 
     selected?.let { product ->
@@ -82,8 +114,23 @@ fun ProductsScreen(
             onDismissRequest = { selected = null },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         ) {
-            ProductDetail(product)
+            ProductDetail(product) {
+                selected = null
+                editing = Editing(product)
+            }
         }
+    }
+}
+
+/** Wrapper so `null` can mean "list" while `Editing(null)` means "create". */
+@JvmInline
+value class Editing<T>(val value: T?)
+
+/** The create FAB, positioned by the caller. */
+@Composable
+fun AddButton(description: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    FloatingActionButton(onClick = onClick, modifier = modifier.padding(16.dp)) {
+        Icon(Icons.Default.Add, contentDescription = description)
     }
 }
 
@@ -158,7 +205,7 @@ private fun ProductRow(product: Product, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ProductDetail(product: Product) {
+private fun ProductDetail(product: Product, onEdit: () -> Unit) {
     SheetBody {
         product.imageUrl?.let {
             AsyncImage(
@@ -196,6 +243,11 @@ private fun ProductDetail(product: Product) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
+        }
+        SheetActions {
+            Button(onClick = onEdit, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.action_edit))
+            }
         }
     }
 }

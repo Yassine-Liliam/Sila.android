@@ -17,4 +17,5 @@ class Repos(context: Context) {
     val conversations = ConversationRepository(app)
     val purchases = PurchaseRepository(app)
     val deliveries = DeliveryRepository(app)
+    val settings = SettingsRepository(app)
 }

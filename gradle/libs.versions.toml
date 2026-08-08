@@ -13,6 +13,7 @@ googleid = "1.2.0"
 retrofit = "3.0.0"
 kotlinxSerialization = "1.9.0"
 coil = "3.3.0"
+browser = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,9 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 # Coil 3 ships no networking of its own — without this, every remote image silently fails.
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+# Custom Tabs: Instagram OAuth must happen in a browser (Meta requires an HTTPS redirect),
+# and a Custom Tab keeps it in-app rather than throwing the owner out to Chrome.
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

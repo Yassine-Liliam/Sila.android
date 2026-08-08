@@ -331,6 +331,12 @@ fun SilatiApp(
                     modifier = Modifier.padding(innerPadding),
                 )
 
+                current == Dest.Settings && repos != null -> SettingsScreen(
+                    settings = repos.settings,
+                    onSignedOut = onSignedOut,
+                    modifier = Modifier.padding(innerPadding),
+                )
+
                 else -> Placeholder(
                     text = stringResource(current.label),
                     modifier = Modifier.padding(innerPadding),

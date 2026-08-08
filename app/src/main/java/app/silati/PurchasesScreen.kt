@@ -10,17 +10,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,9 +33,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.silati.data.Purchase
 import app.silati.data.PurchaseRepository
+import app.silati.data.SessionError
+import app.silati.ui.ButtonSpinner
+import app.silati.ui.ConfirmDialog
 import app.silati.ui.PagedList
+import app.silati.ui.SheetActions
+import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
+import app.silati.ui.rememberSheetActionState
+import kotlinx.coroutines.launch
 
 /** Orders. Confirm/cancel are Phase 6 — for now the assistant does them. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +54,7 @@ fun PurchasesScreen(
 ) {
     var status by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<Purchase?>(null) }
+    var reloadKey by remember { mutableIntStateOf(0) }
 
     Column(modifier = modifier.fillMaxSize()) {
         StatusFilter(
@@ -58,6 +70,7 @@ fun PurchasesScreen(
             emptyText = stringResource(R.string.purchases_empty),
             emptyTextWhenFiltered = stringResource(R.string.purchases_no_match),
             onSignedOut = onSignedOut,
+            reloadKey = reloadKey,
         ) { purchase ->
             PurchaseRow(purchase) { selected = purchase }
         }
@@ -111,8 +124,97 @@ fun PurchasesScreen(
                         stringResource(deliveryStatusLabel(it.status)),
                     )
                 }
+                PurchaseActions(
+                    purchase = purchase,
+                    purchases = purchases,
+                    onSignedOut = onSignedOut,
+                    onDone = {
+                        selected = null
+                        reloadKey++
+                    },
+                )
             }
         }
+    }
+}
+
+/**
+ * Confirm / cancel.
+ *
+ * Confirming is one tap: it's the happy path, and it's reversible by cancelling. Cancelling
+ * asks first — nothing in the app can undo it.
+ */
+@Composable
+private fun PurchaseActions(
+    purchase: Purchase,
+    purchases: PurchaseRepository,
+    onSignedOut: () -> Unit,
+    onDone: () -> Unit,
+) {
+    val action = rememberSheetActionState()
+    val scope = rememberCoroutineScope()
+    var askCancel by remember { mutableStateOf(false) }
+    val failedText = stringResource(R.string.action_failed)
+    val offlineText = stringResource(R.string.sign_in_offline)
+
+    fun run(block: suspend () -> Unit) {
+        action.busy = true
+        action.error = null
+        scope.launch {
+            runCatching { block() }
+                .onSuccess { onDone() }
+                .onFailure { failure ->
+                    when (failure) {
+                        is SessionError.SignedOut -> onSignedOut()
+                        is SessionError.Offline -> action.error = offlineText
+                        // Carries the backend's wording, e.g. "Purchase is already confirmed."
+                        is SessionError.Failed -> action.error = failure.detail ?: failedText
+                        else -> action.error = failedText
+                    }
+                }
+            action.busy = false
+        }
+    }
+
+    if (purchase.status == "cancelled") return
+
+    SheetActions {
+        if (purchase.status == "pending") {
+            Button(
+                onClick = { run { purchases.confirm(purchase.id) } },
+                enabled = !action.busy,
+                modifier = Modifier.weight(1f),
+            ) {
+                if (action.busy) ButtonSpinner() else Text(stringResource(R.string.action_confirm))
+            }
+        }
+        OutlinedButton(
+            onClick = { askCancel = true },
+            enabled = !action.busy,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(stringResource(R.string.action_cancel_order))
+        }
+    }
+    SheetError(action.error)
+
+    if (purchase.status == "pending") {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.purchase_confirm_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+
+    if (askCancel) {
+        ConfirmDialog(
+            title = stringResource(R.string.action_cancel_order),
+            body = stringResource(R.string.purchase_cancel_body),
+            confirmLabel = stringResource(R.string.action_cancel_order),
+            onConfirm = { run { purchases.cancel(purchase.id) } },
+            onDismiss = { askCancel = false },
+        )
     }
 }
 

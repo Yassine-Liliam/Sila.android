@@ -37,6 +37,16 @@ class ClientRepository(context: Context) {
             val token = tokens.read() ?: throw SessionError.SignedOut
             api.clients(bearer(token), cursor, search?.takeIf { it.isNotBlank() })
         }
+
+    suspend fun create(input: ClientInput): Client = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.createClient(bearer(token), input).client
+    }
+
+    suspend fun update(id: String, input: ClientInput): Client = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.updateClient(bearer(token), id, input).client
+    }
 }
 
 // ── Conversations ───────────────────────────────────────────────────────────
@@ -94,6 +104,12 @@ class ConversationRepository(context: Context) {
         val token = tokens.read() ?: throw SessionError.SignedOut
         api.conversation(bearer(token), id, cursor)
     }
+
+    /** Pause or resume the AI on one thread. Resuming picks the context back up. */
+    suspend fun setPaused(id: String, paused: Boolean): Boolean = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.setConversationPaused(bearer(token), id, PausedRequest(paused)).paused
+    }
 }
 
 // ── Purchases ───────────────────────────────────────────────────────────────
@@ -138,6 +154,21 @@ class PurchaseRepository(context: Context) {
             val token = tokens.read() ?: throw SessionError.SignedOut
             api.purchases(bearer(token), cursor, status?.takeIf { it.isNotBlank() })
         }
+
+    /**
+     * Confirm an order — the owner-gated step the product turns on. The customer AI can only
+     * ever record a pending purchase; confirming is also what creates the delivery.
+     * A 409 comes back if it isn't pending any more.
+     */
+    suspend fun confirm(id: String): Purchase = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.confirmPurchase(bearer(token), id).purchase
+    }
+
+    suspend fun cancel(id: String): Purchase = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.cancelPurchase(bearer(token), id).purchase
+    }
 }
 
 // ── Deliveries ──────────────────────────────────────────────────────────────
@@ -170,4 +201,10 @@ class DeliveryRepository(context: Context) {
             val token = tokens.read() ?: throw SessionError.SignedOut
             api.deliveries(bearer(token), cursor, status?.takeIf { it.isNotBlank() })
         }
+
+    /** Marking a delivery `delivered` also stamps its delivery time, server-side. */
+    suspend fun setStatus(id: String, status: String): Delivery = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.updateDelivery(bearer(token), id, DeliveryUpdate(status)).delivery
+    }
 }

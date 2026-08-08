@@ -182,14 +182,69 @@ so opening one costs no request and needs no back stack. **Phase 6 is where that
 true** — an edit form wants real navigation, and that is the moment to add navigation-compose.
 
 ### Phase 6 — Write actions
-Confirm/cancel a purchase, pause/resume a conversation, create/edit products, update delivery
-status. Purchase confirmation creates the delivery when the business delivers — same rule as
-the web.
 
-### Phase 7 — Settings + Instagram connect
-Settings tabs (profile, business, AI, delivery, danger zone). **Instagram connect opens the
-web flow in a Custom Tab and deep-links back** — Meta requires a public HTTPS redirect, so a
-native reimplementation buys nothing.
+**6a — one-tap actions** ✅ *(done 2026-08-08)*
+Confirm/cancel a purchase, pause/resume a conversation, set a delivery's status. No forms and
+no navigation: they're buttons in the detail sheets that already existed. Every endpoint
+returns the updated entity, and the list re-fetches after a write (`reloadKey` on
+`PagedList`) — confirming an order can also create a delivery, so re-reading is the only way
+the list is certainly right.
+
+Confirming is one tap (happy path, reversible by cancelling); cancelling asks first, since
+nothing in the app can undo it.
+
+**6b — create/edit forms** ✅ *(done 2026-08-08)*
+Product and client create/edit, reached from a FAB on the list or an Edit button in the
+detail sheet.
+
+**`navigation-compose` was planned here and deliberately not added.** A form reached from
+exactly one place needs no back stack, no route arguments and no deep link — its argument is
+the entity, passed directly, and back is one `BackHandler`. Adding the library would have
+meant restructuring working navigation to gain nothing. The repo convention already said as
+much ("nav is a state value and a `when` until a screen actually *needs* a back stack"); this
+is the first time that rule was tested, and it held.
+
+The likely trigger for revisiting is Phase 9: a push notification opening a specific order is
+a real deep link, and that is when the library earns its place.
+
+One shape to keep: `ProductInput` / `ClientInput` have every field nullable, and the Json is
+configured `explicitNulls = false`, so a null field is **omitted** from the request — which
+the backend reads as "leave alone". That's what lets one type serve both POST and PATCH. To
+*clear* a field you send an empty string, and `stock = ""` therefore means "stop tracking"
+while `stock = "0"` means "tracked, none left".
+
+Not done: **image picking**, so a product photo still has to be set from the web. Both routes
+already accept `image: { data, mediaType }` — it needs a `PickVisualMedia` launcher and
+base64, not a protocol change.
+
+### ~~Phase 7 — Settings + Instagram connect~~ ✅ *(done 2026-08-08)*
+One scrolling screen of cards rather than tabs — profile, business, AI, delivery & payment,
+policies, Instagram, danger zone.
+
+The screen **never composes the AI brief**. It sends the onboarding answers; the backend
+merges, sanitises and re-derives `businessProfile` from them. That's the same rule the web
+follows and the reason the answers and the text the AIs read can't drift.
+
+**Instagram connect is a real in-app button.** Meta requires an HTTPS redirect, so the
+authorize screen has to be Instagram's own web page — but that is now the *only* screen the
+owner sees. Tapping Connect fetches a one-time code from
+`POST /api/mobile/instagram/connect-code`, opens a **Custom Tab** at
+`/api/instagram/handoff?code=…`, and the Worker turns that code into a browser session and
+redirects straight into the OAuth flow. No second sign-in.
+
+The code is 32 random bytes, single-use, and dead after 60 seconds — which is what makes it
+safe to carry in a URL when the session token would not be. Fetch it on tap, never earlier.
+
+**No deep link back**: returning is a back press, and the card has a Refresh button. Auto-
+returning would mean hosting `assetlinks.json` and app-link verification to save one tap.
+
+Account deletion is type-to-confirm (`DELETE`), matching the API's own guard. It cascades
+everything including the device's session, so success drops straight to the sign-in screen.
+
+Option lists (languages, tones, rules, payments) are **duplicated** from the web wizard's
+`compose.ts` in `data/Settings.kt` — the repos share no code. The backend only length-caps
+and never validates against them, so drift degrades to different suggestions, never a
+rejected save.
 
 ### Phase 8 — French + Arabic
 `values-fr`, `values-ar`, RTL. Strings go into `strings.xml` from day one, so this stays one

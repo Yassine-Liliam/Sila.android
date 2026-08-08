@@ -55,4 +55,14 @@ class ProductRepository(context: Context) {
                 search = search?.takeIf { it.isNotBlank() },
             )
         }
+
+    suspend fun create(input: ProductInput): Product = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.createProduct(bearer(token), input).product
+    }
+
+    suspend fun update(id: String, input: ProductInput): Product = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.updateProduct(bearer(token), id, input).product
+    }
 }

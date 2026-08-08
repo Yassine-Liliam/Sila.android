@@ -46,6 +46,10 @@ import kotlinx.coroutines.delay
  *
  * @param filter reload key. A change resets the list; a non-empty one is debounced, so
  *   typing a search doesn't fire a request per keystroke.
+ * @param reloadKey bump to re-fetch from the first page after a write action. Reloading
+ *   rather than patching the row in place is deliberate: confirming an order can also create
+ *   a delivery and flip a status, and re-reading is the only way the list is certainly right.
+ *   ponytail: it costs the scroll position — fine for a shop's list lengths, revisit if not.
  */
 @Composable
 fun <T : Any> PagedList(
@@ -56,6 +60,7 @@ fun <T : Any> PagedList(
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
     emptyTextWhenFiltered: String? = null,
+    reloadKey: Int = 0,
     row: @Composable (T) -> Unit,
 ) {
     var items by remember { mutableStateOf<List<T>>(emptyList()) }
@@ -78,7 +83,7 @@ fun <T : Any> PagedList(
         }
     }
 
-    LaunchedEffect(filter, reloads) {
+    LaunchedEffect(filter, reloads, reloadKey) {
         if (filter.isNotEmpty()) delay(300)
         loading = true
         error = null

@@ -10,7 +10,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -87,7 +89,154 @@ interface SilatiApi {
         @Query("cursor") cursor: String? = null,
         @Query("status") status: String? = null,
     ): Page<Delivery>
+
+    // Write actions. Each returns the updated entity, so the UI never has to guess what the
+    // server did — confirming an order can also create a delivery, for instance.
+
+    /** Owner-gated. Also creates the delivery when the business delivers and there's an address. */
+    @POST("api/mobile/purchases/{id}/confirm")
+    suspend fun confirmPurchase(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+    ): PurchaseEnvelope
+
+    /** Cancels the order and, if it has one, its pending or in-transit delivery. */
+    @POST("api/mobile/purchases/{id}/cancel")
+    suspend fun cancelPurchase(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+    ): PurchaseEnvelope
+
+    /** Human takeover: paused means the webhook keeps recording but the AI stops replying. */
+    @PATCH("api/mobile/conversations/{id}/paused")
+    suspend fun setConversationPaused(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+        @Body body: PausedRequest,
+    ): PausedResponse
+
+    @PATCH("api/mobile/deliveries/{id}")
+    suspend fun updateDelivery(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+        @Body body: DeliveryUpdate,
+    ): DeliveryEnvelope
+
+    @POST("api/mobile/products")
+    suspend fun createProduct(
+        @Header("Authorization") bearer: String,
+        @Body body: ProductInput,
+    ): ProductEnvelope
+
+    @PATCH("api/mobile/products/{id}")
+    suspend fun updateProduct(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+        @Body body: ProductInput,
+    ): ProductEnvelope
+
+    @POST("api/mobile/clients")
+    suspend fun createClient(
+        @Header("Authorization") bearer: String,
+        @Body body: ClientInput,
+    ): ClientEnvelope
+
+    @PATCH("api/mobile/clients/{id}")
+    suspend fun updateClient(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: String,
+        @Body body: ClientInput,
+    ): ClientEnvelope
+
+    @GET("api/mobile/settings")
+    suspend fun settings(@Header("Authorization") bearer: String): SettingsResponse
+
+    /**
+     * A one-time URL that signs this owner into the browser and drops them straight into the
+     * Instagram OAuth flow. Valid for about a minute and single-use — fetch it when the
+     * Connect button is tapped, never earlier.
+     */
+    @POST("api/mobile/instagram/connect-code")
+    suspend fun instagramConnectUrl(
+        @Header("Authorization") bearer: String,
+    ): InstagramConnectUrl
+
+    /** The backend re-derives the AI brief from the answers; it is never sent from here. */
+    @PATCH("api/mobile/settings")
+    suspend fun updateSettings(
+        @Header("Authorization") bearer: String,
+        @Body body: SettingsPatch,
+    ): SettingsPatchResponse
+
+    /** Body must carry `confirm: "DELETE"` — the API refuses a bare irreversible DELETE. */
+    @HTTP(method = "DELETE", path = "api/mobile/account", hasBody = true)
+    suspend fun deleteAccount(
+        @Header("Authorization") bearer: String,
+        @Body body: DeleteAccountRequest,
+    ): DeleteAccountResponse
 }
+
+@Serializable
+data class InstagramConnectUrl(val url: String, val expiresAt: String? = null)
+
+@Serializable
+data class SettingsPatchResponse(val user: ApiUser? = null)
+
+@Serializable
+data class DeleteAccountResponse(val deleted: Boolean = false)
+
+@Serializable
+data class ProductEnvelope(val product: Product)
+
+@Serializable
+data class ClientEnvelope(val client: Client)
+
+/**
+ * Product create/update body.
+ *
+ * Every field is nullable and the Json is configured with `explicitNulls = false`, so a null
+ * is **omitted from the request** — which the backend reads as "leave this alone". That's
+ * what makes one type serve both POST and PATCH.
+ *
+ * To *clear* a field, send an empty string rather than null: the backend turns a
+ * present-but-empty value into null. `stock = ""` therefore means "stop tracking stock",
+ * which is different from `stock = "0"` (tracked, none left).
+ */
+@Serializable
+data class ProductInput(
+    val name: String? = null,
+    val price: String? = null,
+    val description: String? = null,
+    val stock: String? = null,
+    val currency: String? = null,
+    val active: Boolean? = null,
+)
+
+/** Same omit-vs-empty rule as [ProductInput]. */
+@Serializable
+data class ClientInput(
+    val name: String? = null,
+    val phone: String? = null,
+    val address: String? = null,
+    val city: String? = null,
+    val email: String? = null,
+    val notes: String? = null,
+)
+
+@Serializable
+data class PurchaseEnvelope(val purchase: Purchase)
+
+@Serializable
+data class DeliveryEnvelope(val delivery: Delivery)
+
+@Serializable
+data class PausedRequest(val paused: Boolean)
+
+@Serializable
+data class PausedResponse(val id: String, val paused: Boolean)
+
+@Serializable
+data class DeliveryUpdate(val status: String)
 
 // ── Wire types ──────────────────────────────────────────────────────────────
 // Every optional field carries a default so a backend that adds or omits a key can't crash

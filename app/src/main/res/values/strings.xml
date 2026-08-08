@@ -63,6 +63,74 @@
     <string name="delivery_failed">Failed</string>
     <string name="delivery_cancelled">Cancelled</string>
 
+    <string name="product_new">New product</string>
+    <string name="product_edit">Edit product</string>
+    <string name="client_new">New client</string>
+    <string name="client_edit">Edit client</string>
+    <string name="client_form_hint">Clients from Instagram are created automatically when the AI records an order.</string>
+
+    <string name="field_name">Name</string>
+    <string name="field_price">Price</string>
+    <string name="field_price_invalid">Enter a number, 0 or more.</string>
+    <string name="field_currency">Currency</string>
+    <string name="field_stock">Stock</string>
+    <string name="field_stock_hint">Leave empty if you don\'t track stock.</string>
+    <string name="field_description">Description</string>
+    <string name="field_active">For sale</string>
+    <string name="field_active_hint">Off hides it from customers and the AI, keeping past orders intact.</string>
+
+    <string name="settings_profile">Profile</string>
+    <string name="settings_business">Business</string>
+    <string name="settings_ai">AI replies</string>
+    <string name="settings_delivery">Delivery &amp; payment</string>
+    <string name="settings_policies">Policies</string>
+    <string name="settings_instagram">Instagram</string>
+    <string name="settings_danger">Danger zone</string>
+    <string name="settings_language_hint">A default, not a rule — the AI answers in whatever language the customer writes in.</string>
+
+    <string name="field_business_name">Business name</string>
+    <string name="field_sells">What you sell</string>
+    <string name="field_story">About the business</string>
+    <string name="field_ai_language">Default reply language</string>
+    <string name="field_tone">Tone</string>
+    <string name="field_rules">Rules the AI follows</string>
+    <string name="field_delivers">We deliver</string>
+    <string name="field_delivery_areas">Delivery areas</string>
+    <string name="field_comma_separated">Separate with commas.</string>
+    <string name="field_pickup_address">Pickup address</string>
+    <string name="field_payment">Payment accepted</string>
+    <string name="field_confirm_info">Collect before confirming an order</string>
+    <string name="field_returns">Accept returns</string>
+    <string name="field_return_days">Days to return</string>
+    <string name="field_other_policies">Other policies</string>
+
+    <string name="instagram_connected">Connected</string>
+    <string name="instagram_not_connected">Not connected. Customers\' DMs won\'t reach the AI yet.</string>
+    <string name="instagram_connect_hint">Instagram\'s own page opens to approve access — Meta requires it. Come back afterwards and refresh.</string>
+    <string name="instagram_connect">Connect Instagram</string>
+    <string name="instagram_reconnect">Reconnect</string>
+    <string name="action_refresh">Refresh</string>
+
+    <string name="delete_account">Delete account</string>
+    <string name="delete_account_body">Deletes your account and everything in it: business, products, clients, orders, deliveries and Instagram conversations.</string>
+    <string name="delete_account_warning">This cannot be undone. Everything is deleted permanently.</string>
+    <string name="delete_account_type">Type DELETE to confirm</string>
+
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_confirm">Confirm order</string>
+    <string name="action_cancel_order">Cancel order</string>
+    <string name="action_back">Back</string>
+    <string name="action_pause_ai">Pause AI</string>
+    <string name="action_resume_ai">Resume AI</string>
+    <string name="action_failed">That didn\'t work. Try again.</string>
+    <string name="purchase_confirm_hint">Confirming creates the delivery, if you deliver and the client has an address.</string>
+    <string name="purchase_cancel_body">This also cancels its delivery if there is one. You can\'t undo it from the app.</string>
+    <string name="conversation_paused_hint">The AI is paused. Messages are still recorded — resuming picks up with full context.</string>
+    <string name="conversation_active_hint">The AI is answering this conversation. Pause it to reply yourself.</string>
+    <string name="delivery_set_status">Change status</string>
+
     <string name="filter_all">All</string>
     <string name="status_unknown">Unknown</string>
     <string name="unknown_client">Unknown client</string>
