@@ -149,6 +149,9 @@
     <string name="field_created">Created</string>
     <string name="field_client_since">Client since</string>
 
+    <string name="notification_channel_name">Orders and messages</string>
+    <string name="notification_channel_description">New Instagram messages and orders waiting for your confirmation.</string>
+
     <string name="loading">Loading…</string>
     <string name="retry">Retry</string>
     <string name="not_onboarded">Finish setting up your business on silati.app, then reopen the app.</string>

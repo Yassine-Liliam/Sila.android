@@ -14,6 +14,8 @@ retrofit = "3.0.0"
 kotlinxSerialization = "1.9.0"
 coil = "3.3.0"
 browser = "1.9.0"
+googleServices = "4.4.3"
+firebaseBom = "34.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,9 +45,15 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 # Custom Tabs: Instagram OAuth must happen in a browser (Meta requires an HTTPS redirect),
 # and a Custom Tab keeps it in-app rather than throwing the owner out to Chrome.
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+# The BOM pins every Firebase artifact's version, so firebase-messaging carries none itself.
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+# Reads app/google-services.json and generates the Firebase config resources. The build
+# fails outright if that file is missing.
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 

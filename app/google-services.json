@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "457209437516",
+    "project_id": "silati-2b4b5",
+    "storage_bucket": "silati-2b4b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457209437516:android:980dd28471bf194413c3e9",
+        "android_client_info": {
+          "package_name": "app.silati"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5pi8R7s3yWKgM1aFrXUzNMWlAqDnlZ00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

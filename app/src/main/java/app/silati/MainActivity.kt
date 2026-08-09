@@ -1,9 +1,14 @@
 package app.silati
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,14 +70,32 @@ import app.silati.ui.theme.SilatiTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    /**
+     * Where a tapped notification wants us to go, from the `destination` data field the
+     * backend sends. Held as state rather than read once, because the app is usually already
+     * running when a notification is tapped — onNewIntent, not onCreate.
+     */
+    private val tappedDestination = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        tappedDestination.value = intent?.getStringExtra(SilatiMessagingService.EXTRA_DESTINATION)
         setContent {
             SilatiTheme {
-                SilatiRoot(remember { SessionRepository(applicationContext) })
+                SilatiRoot(
+                    sessions = remember { SessionRepository(applicationContext) },
+                    tappedDestination = tappedDestination.value,
+                    onDestinationHandled = { tappedDestination.value = null },
+                )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        tappedDestination.value = intent.getStringExtra(SilatiMessagingService.EXTRA_DESTINATION)
     }
 }
 
@@ -93,7 +116,11 @@ private sealed interface UiState {
  * repository has already cleared it by then.
  */
 @Composable
-private fun SilatiRoot(sessions: SessionRepository) {
+private fun SilatiRoot(
+    sessions: SessionRepository,
+    tappedDestination: String? = null,
+    onDestinationHandled: () -> Unit = {},
+) {
     var state by remember { mutableStateOf<UiState>(UiState.Loading) }
     var attempt by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
@@ -118,6 +145,24 @@ private fun SilatiRoot(sessions: SessionRepository) {
         }
     }
 
+    // Notifications are opt-in from Android 13. Asked once the owner is actually signed in,
+    // not at launch: the prompt only makes sense next to something worth being told about,
+    // and a denial here is permanent until they go into system settings.
+    val askNotifications = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* Granted or not, the app works — only the notifications differ. */ }
+
+    // Registration runs on every sign-in, not just the first: FCM rotates tokens, and the
+    // backend upserts, so repeating is free and missing one means a silent phone.
+    LaunchedEffect(state) {
+        if (state is UiState.Ready) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            runCatching { repos.push.register() }
+        }
+    }
+
     when (val current = state) {
         is UiState.Loading -> LoadingScreen()
 
@@ -138,9 +183,14 @@ private fun SilatiRoot(sessions: SessionRepository) {
         is UiState.Ready -> SilatiApp(
             session = current.session,
             onSignOut = {
-                sessions.signOut()
-                chatMessages = emptyList() // never leave one owner's conversation for the next
-                state = UiState.SignedOut
+                scope.launch {
+                    // Unregister BEFORE clearing the session — the request needs that token,
+                    // and a signed-out phone that keeps buzzing is worse than no push at all.
+                    runCatching { repos.push.unregister() }
+                    sessions.signOut()
+                    chatMessages = emptyList() // don't leave one owner's chat for the next
+                    state = UiState.SignedOut
+                }
             },
             // The token was already cleared server-side or locally; drop to sign-in.
             onSignedOut = {
@@ -150,6 +200,8 @@ private fun SilatiRoot(sessions: SessionRepository) {
             repos = repos,
             chatMessages = chatMessages,
             onChatMessagesChange = { chatMessages = it },
+            tappedDestination = tappedDestination,
+            onDestinationHandled = onDestinationHandled,
         )
 
         is UiState.Failed -> ErrorScreen(
@@ -218,10 +270,24 @@ fun SilatiApp(
     repos: Repos? = null,
     chatMessages: List<ChatMessage> = emptyList(),
     onChatMessagesChange: (List<ChatMessage>) -> Unit = {},
+    tappedDestination: String? = null,
+    onDestinationHandled: () -> Unit = {},
 ) {
     var current by rememberSaveable { mutableStateOf(Dest.Assistant) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // A tapped notification says where it came from; land there instead of on the assistant.
+    // Cleared once handled, so rotating the screen doesn't yank the owner back.
+    LaunchedEffect(tappedDestination) {
+        when (tappedDestination) {
+            "purchases" -> current = Dest.Purchases
+            "conversations" -> current = Dest.Conversations
+            null -> return@LaunchedEffect
+            else -> Unit // unknown destination: stay put rather than guess
+        }
+        onDestinationHandled()
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,

@@ -266,9 +266,33 @@ the manifest give the app a per-app Language entry in Android Settings (13+); be
 follows the system language. The platform already has the picker — the web app needs its own
 because the browser has none.
 
-### Phase 9 — Push notifications
+### ~~Phase 9 — Push notifications~~ ✅ *(done 2026-08-08)*
 FCM: new DM, new pending order. The one thing the web genuinely cannot do, and the reason an
 owner keeps the app installed.
+
+**Setup that isn't in this repo:** a Firebase project (`silati-2b4b5`) with `app.silati`
+registered, `app/google-services.json` committed, and the matching **service-account JSON**
+set as the Worker secret `FCM_SERVICE_ACCOUNT`. The service account must come from the same
+Firebase project — a key from a different Google Cloud project fails at send time.
+
+Things that will bite whoever touches this next:
+- **`onMessageReceived` only fires in the foreground.** A push carrying a `notification`
+  payload is drawn by the system when the app is backgrounded or dead, and the service is
+  never called. `SilatiMessagingService` exists for the foreground case only.
+- **The notification channel is created in `SilatiApplication`**, not an activity: Android 8+
+  silently drops notifications posted to a channel that doesn't exist, and a push can arrive
+  long before `MainActivity` ever runs. The manifest also names it as FCM's default channel,
+  for the system-drawn case.
+- **Registration runs on every sign-in**, not just the first — FCM rotates tokens on
+  reinstall, restore, and at its own discretion. The backend upserts, so repeating is free;
+  missing one means a permanently silent phone. `onNewToken` re-registers too.
+- **Unregister happens *before* the session is cleared** on sign-out, because the request
+  needs that token. A signed-out phone that keeps buzzing is worse than no push at all.
+- Tapping a notification carries a `destination` and lands on Purchases or Conversations;
+  the app is usually already running, so it arrives via `onNewIntent`, not `onCreate`.
+
+Backend side lives in the Next repo: `lib/push.ts` (FCM HTTP v1, JWT signed with WebCrypto —
+`firebase-admin` can't run on Workers) and `POST/DELETE /api/mobile/devices`.
 
 ### Phase 10 — Visual design
 

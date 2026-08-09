@@ -148,6 +148,20 @@ interface SilatiApi {
         @Body body: ClientInput,
     ): ClientEnvelope
 
+    /** Register this device's FCM token. Safe to repeat — the backend upserts. */
+    @POST("api/mobile/devices")
+    suspend fun registerDevice(
+        @Header("Authorization") bearer: String,
+        @Body body: DeviceTokenRequest,
+    ): DeviceRegistration
+
+    /** DELETE with a body — hence @HTTP rather than @DELETE, which forbids one. */
+    @HTTP(method = "DELETE", path = "api/mobile/devices", hasBody = true)
+    suspend fun unregisterDevice(
+        @Header("Authorization") bearer: String,
+        @Body body: DeviceTokenRequest,
+    ): DeviceRegistration
+
     @GET("api/mobile/settings")
     suspend fun settings(@Header("Authorization") bearer: String): SettingsResponse
 
@@ -175,6 +189,15 @@ interface SilatiApi {
         @Body body: DeleteAccountRequest,
     ): DeleteAccountResponse
 }
+
+@Serializable
+data class DeviceTokenRequest(val token: String)
+
+@Serializable
+data class DeviceRegistration(
+    val registered: Boolean = false,
+    val unregistered: Boolean = false,
+)
 
 @Serializable
 data class InstagramConnectUrl(val url: String, val expiresAt: String? = null)

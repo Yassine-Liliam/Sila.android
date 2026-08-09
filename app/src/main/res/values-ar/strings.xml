@@ -145,6 +145,9 @@
     <string name="field_created">تاريخ الإنشاء</string>
     <string name="field_client_since">زبون منذ</string>
 
+    <string name="notification_channel_name">الطلبات والرسائل</string>
+    <string name="notification_channel_description">رسائل Instagram الجديدة والطلبات التي تنتظر تأكيدك.</string>
+
     <string name="loading">جارٍ التحميل…</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="not_onboarded">أكمل إعداد نشاطك التجاري على silati.app، ثم أعد فتح التطبيق.</string>

@@ -4,8 +4,11 @@
 
     <!-- Everything the app shows comes from the Worker at BuildConfig.BASE_URL. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+: notifications are opt-in and must be requested at runtime. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".SilatiApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,6 +30,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".SilatiMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!--
+          Used by the system when it draws a notification itself — i.e. every push that
+          arrives while the app is backgrounded or dead. Without this the message would land
+          on a channel that doesn't exist and be dropped silently.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="silati" />
     </application>
 
 </manifest>
