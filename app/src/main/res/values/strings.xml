@@ -2,6 +2,8 @@
     <!-- A brand name: never translated, in any locale. -->
     <string name="app_name" translatable="false">Silati</string>
 
+    <!-- Drawer group label above the content destinations. Matches the web sidebar's. -->
+    <string name="nav_group">Business</string>
     <string name="nav_assistant">Assistant</string>
     <string name="nav_products">Products</string>
     <string name="nav_clients">Clients</string>
@@ -9,6 +11,7 @@
     <string name="nav_purchases">Purchases</string>
     <string name="nav_deliveries">Deliveries</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_language">Language</string>
 
     <string name="open_menu">Open menu</string>
 

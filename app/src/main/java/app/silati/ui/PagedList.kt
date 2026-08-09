@@ -152,7 +152,10 @@ fun <T : Any> PagedList(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(items, key = itemKey) { row(it) }
+                // Keyed + animateItem: a write re-fetches the whole first page, so rows that
+                // moved (or a confirmed order leaving a filtered list) slide instead of
+                // snapping to their new place.
+                items(items, key = itemKey) { Box(Modifier.animateItem()) { row(it) } }
                 if (!reachedEnd) {
                     item {
                         Box(

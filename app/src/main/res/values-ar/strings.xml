@@ -1,6 +1,7 @@
 <resources>
     <!-- app_name is a brand name and stays untranslated (see values/strings.xml). -->
 
+    <string name="nav_group">المتجر</string>
     <string name="nav_assistant">المساعد</string>
     <string name="nav_products">المنتجات</string>
     <string name="nav_clients">الزبناء</string>
@@ -8,6 +9,7 @@
     <string name="nav_purchases">الطلبات</string>
     <string name="nav_deliveries">التوصيل</string>
     <string name="nav_settings">الإعدادات</string>
+    <string name="nav_language">اللغة</string>
 
     <string name="open_menu">فتح القائمة</string>
 

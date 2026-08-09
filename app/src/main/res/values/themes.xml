@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--
+      The platform theme, which Compose never draws with - it only sets the window background
+      behind the app and the Android 12+ splash. Pinning it to Light meant a white flash on
+      every cold start on a phone in dark mode; values-night/ supplies the dark counterpart so
+      the launch matches the theme Compose is about to draw.
+    -->
     <style name="Theme.Silati" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

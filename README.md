@@ -95,9 +95,9 @@ All behind one Bearer check, each reusing `lib/ai-tools.ts`, `lib/business.ts` a
   open a detail sheet. Purchases and Deliveries filter by status; Products and Clients search.
 
 Every screen is wired, including onboarding, write actions, Settings and push — a new owner
-can install the app and get all the way to a working business without touching the website.
-What's left is not features: the **visual design pass (Phase 10)**, polish (11) and the
-Play Store (12).
+can install the app and get all the way to a working business without touching the website —
+and the visual design pass is done (Phase 10). What's left is **polish (Phase 11)** and the
+**Play Store (Phase 12)**.
 
 ## Known issues
 
@@ -287,10 +287,16 @@ only the label the owner reads is localised (`optionLabel()` in `SettingsScreen.
 back to the raw value). Adding an option to the web wizard therefore degrades to "shows in
 English", never to a blank chip.
 
-**No in-app language switcher, on purpose.** `res/xml/locales_config.xml` + `localeConfig` in
-the manifest give the app a per-app Language entry in Android Settings (13+); below that it
-follows the system language. The platform already has the picker — the web app needs its own
-because the browser has none.
+**The language switcher is in the drawer** (added 2026-08-09, reversing the original "the
+platform already has a picker" call — an owner shouldn't have to leave the app to find it).
+It writes the **platform's** per-app locale via `LocaleManager`, so the drawer and the entry
+in Android Settings are one setting, not two that can disagree, and
+`res/xml/locales_config.xml` + `localeConfig` still declare what's offered. Changing it
+recreates the activity — that's the platform, and the assistant conversation goes with it.
+
+**API 33+ only**: below that the item is absent and the app follows the system language, as
+it always did. Covering older phones means adding `appcompat` for
+`AppCompatDelegate.setApplicationLocales`, a dependency for a shrinking slice of devices.
 
 ### ~~Phase 9 — Push notifications~~ ✅ *(done 2026-08-08, verified on device 2026-08-09)*
 FCM: **new pending order**. The one thing the web genuinely cannot do, and the reason an owner
@@ -332,31 +338,53 @@ Things that will bite whoever touches this next:
 Backend side lives in the Next repo: `lib/push.ts` (FCM HTTP v1, JWT signed with WebCrypto —
 `firebase-admin` can't run on Workers) and `POST/DELETE /api/mobile/devices`.
 
-### Phase 10 — Visual design
+### ~~Phase 10 — Visual design~~ ✅ *(done 2026-08-09)*
 
-The app has no considered design of its own yet — it is stock Material 3 defaults, which is
-*correct* but not *designed*. Every screen was built to work; none was built to look like
-anything. This is the pass that decides what Silati looks like on Android.
+The app was stock Material 3 defaults — *correct* but not *designed*. This pass decided what
+Silati looks like on Android, and the answer is deliberately **more platform, not less**: the
+stance at the top of this README held, so design meant choosing inside Material's grammar
+rather than decorating on top of it.
 
-The stance from the top of this README still binds: **it stays a Material 3 app with dynamic
-colour, and none of the web's dark-glass identity comes across.** Design here means making
-deliberate choices inside the platform's grammar, not decorating on top of it.
+**Material 3 Expressive was tried and is not reachable.** On the material3 that Compose BOM
+`2026.02.01` resolves (1.4.0), `MaterialExpressiveTheme`, `MotionScheme` and
+`ExperimentalMaterial3ExpressiveApi` are **all `internal`** — the classes ship in the artifact
+but nothing outside the library may name them. Getting Expressive means pinning a newer
+material3 against the BOM. Don't re-try it without changing the version first.
 
-What that covers:
-- **Colour** — the theme is a cyan seed and otherwise untouched. Decide what the seed should
-  be, how dynamic colour is allowed to override it, and what the app looks like when it does.
-  Check dark theme, which nothing has been designed against.
-- **Typography** — the default Material scale everywhere. Decide the actual hierarchy: what a
-  screen title is, what a row title is, what secondary text is, and stick to it.
-- **Iconography** — currently stock `Icons.Default.*` picked by name (a shopping cart for
-  products, a map pin for deliveries). Fine as placeholders, not a set.
-- **Motion** — there is none beyond default ripples. Sheet and screen transitions, and what
-  happens when a list item changes after a write.
-- **The launcher icon and app identity** — still the default green Android robot.
-- **Empty-state art** — see Phase 11; the illustration question belongs here, the copy there.
+What landed:
 
-*Do this before Phase 11:* polish refines an established design, and refining defaults means
-doing the work twice.
+- **Colour** — unchanged on purpose. Dynamic colour (Android 12+) already takes the palette
+  from the owner's wallpaper, including on One UI, which is what makes the app look like the
+  phone it runs on. The cyan seed stands in below 12.
+- **Typography** — no custom `Typography`; the M3 scale *is* the platform's, and the problem
+  was assignment, not the scale. The role table now lives in Conventions; two strays were
+  fixed (a `titleLarge` sheet header, a `bodyMedium` row secondary). The template `Type.kt`
+  was deleted — its only override restated an M3 default.
+- **The font stays `FontFamily.Default`** — Roboto on a Pixel, One UI Sans on a Galaxy.
+  Bundling one would look *more* branded and *less* native, which is the wrong trade here.
+- **Launcher icon** — the green robot is gone. The mark is generated by **inverting** the web
+  repo's `silati-icon.svg`: that file is a tile whose logo is the *holes*, so a full-canvas
+  rectangle is prepended to its path data and the whole thing filled `evenOdd`, which drops
+  everything covered twice and leaves the mark. White on black, plus the Android 13+
+  monochrome layer. Per-density bitmaps deleted — dead at minSdk 26.
+- **Launch theme** — `Theme.Silati` was pinned to `Theme.Material.Light`, so a phone in dark
+  mode flashed white on every cold start. `values-night/` now supplies the dark counterpart.
+- **Motion** — `Crossfade` between drawer destinations, `Modifier.animateItem()` on list rows
+  so a write that re-fetches doesn't snap them into place.
+- **Drawer** — app mark beside the business name and email, a `Business` group label matching
+  the web sidebar, no dividers, spaced items, and an account section pinned to the bottom
+  holding Language, Settings and a red Sign out.
+- **Screen titles removed** from the top bar: the drawer already names the destination.
+- **Assistant empty state** — the app mark on a rounded tile above the heading.
+
+Still open, deliberately:
+- **The below-Android-12 fallback palette.** `lightColorScheme`/`darkColorScheme` override
+  only primary/secondary/tertiary, so every other role is still M3's purple baseline — cyan
+  buttons on lavender containers on Android 8–11. Invisible on any test device that has
+  dynamic colour, which is why it wasn't done blind; it needs an API 30 emulator and a full
+  seeded scheme pasted in.
+- **Icons** are still core-set picks (a shopping cart for products, a map pin for deliveries).
+  Better ones live in `material-icons-extended`, a large dependency for cosmetics.
 
 ### Phase 11 — Polish
 
@@ -394,8 +422,9 @@ correctness rather than looks.
 **Gaps that read as bugs**
 - **No product image picker**, so a photo can only be set from the web. Both API routes
   already accept `image: { data, mediaType }` — it needs `PickVisualMedia` and base64.
-- The assistant conversation **survives navigation but not rotation** (`MainActivity`).
-- Still the **default Android launcher icon** (also on the Phase 10 list).
+- The assistant conversation **survives navigation but not rotation** (`MainActivity`), and
+  now also resets when the language is switched, since that recreates the activity. The
+  onboarding wizard's answers have the same gap. One `Saver` covers all three.
 
 **Accessibility**
 - Product images pass `contentDescription = null`; decorative is arguable for a thumbnail,
@@ -469,6 +498,22 @@ For a physical phone: Settings → About phone → Software information → tap 
 - **No dependency without need.** Nav is a state value and a `when` until a screen actually
   needs a back stack, arguments or deep links.
 - **Every user-facing string goes in `strings.xml`**, never hardcoded in a composable.
+- **Type is the stock M3 scale, assigned by role** — no custom `Typography`, because the
+  default scale *is* the platform's and a custom one only makes the app look less native:
+
+  | Role | Style |
+  |---|---|
+  | Sheet / detail header | `headlineSmall` |
+  | Card or section title | `titleMedium` |
+  | Row title | `bodyLarge` + `FontWeight.Medium` |
+  | Row secondary line | `bodySmall`, `onSurfaceVariant` |
+  | Body copy, hints, errors | `bodyMedium` (`bodySmall` when secondary) |
+  | Field label above chips | `labelMedium`, `onSurfaceVariant` |
+  | Timestamps, badges, meta | `labelSmall`, `onSurfaceVariant` |
+
+  The one deliberate exception is the sign-in hero (`displaySmall`). Row secondary is
+  `bodySmall` rather than the `bodyMedium` M3's own list spec suggests: at `bodyLarge`/
+  `bodyMedium` the two lines are nearly the same size and the row reads flat.
 - **Deliberate shortcuts get a `ponytail:` comment** naming the ceiling and the upgrade path.
 - **Claude does not test** — changes are proposed, applied, and then verified by the owner on
   a device, one step at a time.

@@ -181,7 +181,7 @@ private fun ThreadSheet(
         ) {
             Text(
                 text = conversation.title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.weight(1f),
             )
             if (conversation.paused) {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dark counterpart of values/themes.xml. See the note there. -->
+    <style name="Theme.Silati" parent="android:Theme.Material.NoActionBar" />
+</resources>

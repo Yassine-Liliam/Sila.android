@@ -35,6 +35,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -159,6 +162,23 @@ fun AssistantScreen(
 private fun EmptyState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // The launcher icon as a tile — same mark and same background colour, so the
+            // empty screen is recognisably the app rather than a bare sentence.
+            Surface(
+                color = colorResource(R.color.ic_launcher_background),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.size(72.dp),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_launcher_glyph),
+                    contentDescription = null,
+                    // Unspecified keeps the vector's own white; the tile behind it is dark
+                    // whatever the theme, so a theme tint would be wrong here.
+                    tint = Color.Unspecified,
+                    modifier = Modifier.padding(8.dp),
+                )
+            }
+            Spacer(Modifier.height(20.dp))
             Text(
                 text = stringResource(R.string.assistant_empty),
                 style = MaterialTheme.typography.headlineSmall,
@@ -169,6 +189,7 @@ private fun EmptyState() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp),
             )
         }
     }
@@ -227,7 +248,9 @@ private fun Composer(
     onSend: () -> Unit,
     busy: Boolean,
 ) {
-    Surface(tonalElevation = 2.dp) {
+    // Transparent rather than a tonally-raised bar: the composer sits at the bottom of the
+    // screen with nothing scrolling under it, so the tint separated it from nothing.
+    Surface(color = Color.Transparent) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

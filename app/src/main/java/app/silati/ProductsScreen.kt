@@ -181,7 +181,7 @@ private fun ProductRow(product: Product, onClick: () -> Unit) {
                 )
                 Text(
                     text = product.displayPrice,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

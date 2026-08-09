@@ -1,22 +1,30 @@
 package app.silati
 
 import android.Manifest
+import android.app.LocaleManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.LocaleList
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
@@ -31,8 +39,9 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,8 +66,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.silati.data.ChatMessage
@@ -68,6 +79,7 @@ import app.silati.data.SessionError
 import app.silati.data.SessionRepository
 import app.silati.ui.theme.SilatiTheme
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     /**
@@ -305,45 +317,106 @@ fun SilatiApp(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Column(modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp)) {
-                    // The business name is the app's identity once signed in; the app name
-                    // only stands in before there's a session (previews).
-                    Text(
-                        text = session?.displayName ?: stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                    session?.user?.email?.let {
+                Column(modifier = Modifier.fillMaxHeight()) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        // The launcher mark, tinted rather than drawn in brand cyan, so it
+                        // sits in whatever palette dynamic colour gave the rest of the app.
+                        Icon(
+                            painter = painterResource(R.drawable.ic_launcher_glyph),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(40.dp),
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            // The business name is the app's identity once signed in; the app
+                            // name only stands in before there's a session (previews).
+                            Text(
+                                text = session?.displayName ?: stringResource(R.string.app_name),
+                                style = MaterialTheme.typography.titleMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            session?.user?.email?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall,
+                            text = stringResource(R.string.nav_group),
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 28.dp, bottom = 4.dp),
+                        )
+                        // Settings is not in this list: it lives with Sign out at the bottom,
+                        // where account-level actions belong rather than in the content menu.
+                        Dest.entries.filter { it != Dest.Settings }.forEach { dest ->
+                            NavigationDrawerItem(
+                                label = { Text(stringResource(dest.label)) },
+                                icon = { Icon(dest.icon, contentDescription = null) },
+                                selected = current == dest,
+                                onClick = {
+                                    current = dest
+                                    scope.launch { drawerState.close() }
+                                },
+                                modifier = Modifier.padding(
+                                    NavigationDrawerItemDefaults.ItemPadding
+                                ),
+                            )
+                        }
+                    }
+
+                    // Pushes the account section to the bottom of the sheet.
+                    Spacer(Modifier.weight(1f))
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(bottom = 12.dp),
+                    ) {
+                        LanguageItem()
+                        NavigationDrawerItem(
+                            label = { Text(stringResource(Dest.Settings.label)) },
+                            icon = { Icon(Dest.Settings.icon, contentDescription = null) },
+                            selected = current == Dest.Settings,
+                            onClick = {
+                                current = Dest.Settings
+                                scope.launch { drawerState.close() }
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        )
+                        NavigationDrawerItem(
+                            label = { Text(stringResource(R.string.sign_out)) },
+                            icon = {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ExitToApp,
+                                    contentDescription = null,
+                                )
+                            },
+                            selected = false,
+                            // Signing out is the one destructive thing in the drawer.
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedIconColor = MaterialTheme.colorScheme.error,
+                                unselectedTextColor = MaterialTheme.colorScheme.error,
+                            ),
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onSignOut()
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                         )
                     }
                 }
-                HorizontalDivider()
-                Dest.entries.forEach { dest ->
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(dest.label)) },
-                        icon = { Icon(dest.icon, contentDescription = null) },
-                        selected = current == dest,
-                        onClick = {
-                            current = dest
-                            scope.launch { drawerState.close() }
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    )
-                }
-                HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                NavigationDrawerItem(
-                    label = { Text(stringResource(R.string.sign_out)) },
-                    icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onSignOut()
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                )
             }
         },
     ) {
@@ -351,7 +424,9 @@ fun SilatiApp(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(current.label)) },
+                    // No title: the drawer names the destination, and repeating it above every
+                    // screen spent a whole bar on a word the owner just tapped.
+                    title = {},
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
@@ -363,9 +438,13 @@ fun SilatiApp(
                 )
             },
         ) { innerPadding ->
+            // Fade through between destinations. Switching used to be an instant swap, which
+            // reads as a glitch rather than a navigation; the drawer already animates, so the
+            // content was the one part that didn't move.
+            Crossfade(targetState = current, label = "destination") { dest ->
             when {
                 // Not-onboarded never reaches here — SilatiRoot routes it to OnboardingScreen.
-                current == Dest.Assistant && repos != null -> AssistantScreen(
+                dest == Dest.Assistant && repos != null -> AssistantScreen(
                     messages = chatMessages,
                     onMessagesChange = onChatMessagesChange,
                     chats = repos.chat,
@@ -373,45 +452,99 @@ fun SilatiApp(
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Products && repos != null -> ProductsScreen(
+                dest == Dest.Products && repos != null -> ProductsScreen(
                     products = repos.products,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Clients && repos != null -> ClientsScreen(
+                dest == Dest.Clients && repos != null -> ClientsScreen(
                     clients = repos.clients,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Conversations && repos != null -> ConversationsScreen(
+                dest == Dest.Conversations && repos != null -> ConversationsScreen(
                     conversations = repos.conversations,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Purchases && repos != null -> PurchasesScreen(
+                dest == Dest.Purchases && repos != null -> PurchasesScreen(
                     purchases = repos.purchases,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Deliveries && repos != null -> DeliveriesScreen(
+                dest == Dest.Deliveries && repos != null -> DeliveriesScreen(
                     deliveries = repos.deliveries,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                current == Dest.Settings && repos != null -> SettingsScreen(
+                dest == Dest.Settings && repos != null -> SettingsScreen(
                     settings = repos.settings,
                     onSignedOut = onSignedOut,
                     modifier = Modifier.padding(innerPadding),
                 )
 
                 else -> Placeholder(
-                    text = stringResource(current.label),
+                    text = stringResource(dest.label),
                     modifier = Modifier.padding(innerPadding),
+                )
+            }
+            }
+        }
+    }
+}
+
+/**
+ * Language picker for the drawer.
+ *
+ * Sets the app's locale through the **platform's** per-app language setting
+ * (`LocaleManager`), so this and the entry in Android Settings are the same switch rather
+ * than two that can disagree — and `res/xml/locales_config.xml` still declares what's on
+ * offer. Changing it recreates the activity, which is the platform's doing; the assistant
+ * conversation is lost with it, same as a rotation.
+ *
+ * ponytail: API 33+ only, so the item is simply absent below that and the app follows the
+ * system language as it always did. Covering older phones means adding `appcompat` for
+ * `AppCompatDelegate.setApplicationLocales` — a dependency for a shrinking slice of devices.
+ */
+@Composable
+private fun LanguageItem() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+
+    val context = LocalContext.current
+    var open by remember { mutableStateOf(false) }
+    // Language names are written in their own language, never translated.
+    val languages = listOf("en" to "English", "fr" to "Français", "ar" to "العربية")
+    val current = Locale.getDefault().language
+
+    Box {
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.nav_language)) },
+            // The current language's code stands in for an icon: the core icon set has no
+            // globe, and this says which language is active without a second line.
+            icon = {
+                Text(
+                    text = current.uppercase(Locale.ROOT),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            },
+            selected = false,
+            onClick = { open = true },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            languages.forEach { (tag, name) ->
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = {
+                        open = false
+                        context.getSystemService(LocaleManager::class.java)
+                            ?.applicationLocales = LocaleList.forLanguageTags(tag)
+                    },
                 )
             }
         }

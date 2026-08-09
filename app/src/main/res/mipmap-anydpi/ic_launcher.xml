@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cyan mark on black - the brand's two colours, and the one place the app carries its own
+  identity rather than the device's. Everything inside the app follows dynamic colour instead.
+-->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
-    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_glyph" />
+    <!-- Android 13+ themed icons: the system tints this by alpha, so the same art serves. -->
+    <monochrome android:drawable="@drawable/ic_launcher_glyph" />
 </adaptive-icon>
