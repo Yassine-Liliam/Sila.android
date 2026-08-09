@@ -150,7 +150,22 @@
 
     <string name="loading">Chargement…</string>
     <string name="retry">Réessayer</string>
-    <string name="not_onboarded">Terminez la configuration de votre entreprise sur silati.app, puis rouvrez l\'application.</string>
+
+    <string name="onboarding_step">Étape %1$d sur %2$d</string>
+    <string name="onboarding_intro">Quelques questions, pour que l\'IA réponde à vos clients comme vous le feriez.</string>
+    <string name="onboarding_step_business">Votre entreprise</string>
+    <string name="onboarding_step_ai">Les réponses de l\'IA</string>
+    <string name="onboarding_step_delivery">Livraison &amp; paiement</string>
+    <string name="onboarding_step_orders">Confirmation des commandes</string>
+    <string name="onboarding_step_policies">Conditions</string>
+    <string name="field_your_name">Votre nom</string>
+    <string name="field_language">Langue de l\'entreprise</string>
+    <string name="field_delivers_question">Livrez-vous ?</string>
+    <string name="field_delivery_instructions">Consignes de livraison</string>
+    <string name="action_next">Suivant</string>
+    <string name="action_finish">Terminer</string>
+    <string name="action_yes">Oui</string>
+    <string name="action_no">Non</string>
 
     <!-- Labels only: the stored values stay English (see values/strings.xml). -->
     <string name="opt_lang_english">Anglais</string>

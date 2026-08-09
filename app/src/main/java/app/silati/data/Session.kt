@@ -78,6 +78,21 @@ class SessionRepository(context: Context) {
         api.me(bearer(auth.sessionToken)).toSession()
     }
 
+    /**
+     * Create the owner's first business, then re-read the session so the rest of the app sees
+     * an onboarded owner.
+     *
+     * The second call is deliberate: the onboarding response carries the business it created,
+     * but /me is the one shape every screen consumes (it also carries the business name and
+     * Instagram status), so building a Session by hand here would be a second definition of
+     * "what the app knows" waiting to drift.
+     */
+    suspend fun onboard(answers: Onboarding): Session = apiCall(tokens) {
+        val token = tokens.read() ?: throw SessionError.SignedOut
+        api.onboard(bearer(token), answers)
+        api.me(bearer(token)).toSession()
+    }
+
     /** Re-establish the session on launch from the stored token. */
     suspend fun restore(): Session {
         val token = tokens.read() ?: throw SessionError.SignedOut

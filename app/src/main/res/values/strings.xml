@@ -154,7 +154,23 @@
 
     <string name="loading">Loading…</string>
     <string name="retry">Retry</string>
-    <string name="not_onboarded">Finish setting up your business on silati.app, then reopen the app.</string>
+
+    <!-- First-run setup. %1$d is the current step, %2$d the total. -->
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_intro">A few questions, so the AI can answer your customers the way you would.</string>
+    <string name="onboarding_step_business">Your business</string>
+    <string name="onboarding_step_ai">How the AI replies</string>
+    <string name="onboarding_step_delivery">Delivery &amp; payment</string>
+    <string name="onboarding_step_orders">Confirming orders</string>
+    <string name="onboarding_step_policies">Policies</string>
+    <string name="field_your_name">Your name</string>
+    <string name="field_language">Business language</string>
+    <string name="field_delivers_question">Do you deliver?</string>
+    <string name="field_delivery_instructions">Delivery instructions</string>
+    <string name="action_next">Next</string>
+    <string name="action_finish">Finish</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
 
     <!--
       Labels for the settings option chips. The VALUES behind these stay canonical English

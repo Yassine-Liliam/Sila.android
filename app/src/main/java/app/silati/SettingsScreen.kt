@@ -6,8 +6,6 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -44,18 +40,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.core.net.toUri
 import app.silati.data.Onboarding
 import app.silati.data.Options
 import app.silati.data.SessionError
 import app.silati.data.SettingsRepository
 import app.silati.data.SettingsResponse
+import app.silati.ui.AnswerField
 import app.silati.ui.ButtonSpinner
+import app.silati.ui.ChoiceRow
+import app.silati.ui.MultiChoice
+import app.silati.ui.Section
 import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
 import app.silati.ui.Tone
 import app.silati.ui.rememberSheetActionState
+import app.silati.ui.toggle
 import kotlinx.coroutines.launch
 
 /**
@@ -166,7 +166,7 @@ private fun SettingsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Section(stringResource(R.string.settings_profile)) {
-            SettingsField(displayName, { displayName = it }, stringResource(R.string.field_name))
+            AnswerField(displayName, { displayName = it }, stringResource(R.string.field_name))
             Text(
                 text = data.user.email,
                 style = MaterialTheme.typography.bodySmall,
@@ -175,19 +175,19 @@ private fun SettingsBody(
         }
 
         Section(stringResource(R.string.settings_business)) {
-            SettingsField(
+            AnswerField(
                 businessName,
                 { businessName = it },
                 stringResource(R.string.field_business_name),
             )
-            SettingsField(sells, { sells = it }, stringResource(R.string.field_sells))
-            SettingsField(
+            AnswerField(sells, { sells = it }, stringResource(R.string.field_sells))
+            AnswerField(
                 value = story,
                 onValueChange = { story = it },
                 label = stringResource(R.string.field_story),
                 singleLine = false,
             )
-            SettingsField(
+            AnswerField(
                 value = phone,
                 onValueChange = { phone = it },
                 label = stringResource(R.string.field_phone),
@@ -231,14 +231,14 @@ private fun SettingsBody(
                 Switch(checked = delivers, onCheckedChange = { delivers = it })
             }
             if (delivers) {
-                SettingsField(
+                AnswerField(
                     value = deliveryAreas,
                     onValueChange = { deliveryAreas = it },
                     label = stringResource(R.string.field_delivery_areas),
                     supporting = stringResource(R.string.field_comma_separated),
                 )
             } else {
-                SettingsField(
+                AnswerField(
                     value = pickupAddress,
                     onValueChange = { pickupAddress = it },
                     label = stringResource(R.string.field_pickup_address),
@@ -268,14 +268,14 @@ private fun SettingsBody(
                 Switch(checked = returnsAccepted, onCheckedChange = { returnsAccepted = it })
             }
             if (returnsAccepted) {
-                SettingsField(
+                AnswerField(
                     value = returnDays,
                     onValueChange = { returnDays = it },
                     label = stringResource(R.string.field_return_days),
                     keyboardType = KeyboardType.Number,
                 )
             }
-            SettingsField(
+            AnswerField(
                 value = otherPolicies,
                 onValueChange = { otherPolicies = it },
                 label = stringResource(R.string.field_other_policies),
@@ -466,124 +466,6 @@ private fun DeleteAccountDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         },
     )
 }
-
-@Composable
-private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            HorizontalDivider(Modifier.padding(vertical = 8.dp))
-            content()
-        }
-    }
-}
-
-@Composable
-private fun SettingsField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    singleLine: Boolean = true,
-    supporting: String? = null,
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        singleLine = singleLine,
-        supportingText = supporting?.let { { Text(it) } },
-    )
-}
-
-/**
- * The owner-facing label for an option value.
- *
- * The values themselves stay canonical English — they're stored and fed to the AI — so only
- * the label is translated. An unmapped value shows itself, which is what makes adding an
- * option to the web wizard degrade to "untranslated" rather than "blank".
- */
-@Composable
-private fun optionLabel(value: String): String = when (value) {
-    "English" -> stringResource(R.string.opt_lang_english)
-    "French" -> stringResource(R.string.opt_lang_french)
-    "Arabic" -> stringResource(R.string.opt_lang_arabic)
-    "professional" -> stringResource(R.string.opt_tone_professional)
-    "casual" -> stringResource(R.string.opt_tone_casual)
-    "friendly" -> stringResource(R.string.opt_tone_friendly)
-    "Always stay polite and patient" -> stringResource(R.string.opt_rule_polite)
-    "Confirm order details before closing" -> stringResource(R.string.opt_rule_confirm)
-    "Never promise discounts or prices not listed" -> stringResource(R.string.opt_rule_discounts)
-    "Escalate complaints or refunds to a human" -> stringResource(R.string.opt_rule_escalate)
-    "Only answer questions about our products" -> stringResource(R.string.opt_rule_products_only)
-    "Never share personal opinions" -> stringResource(R.string.opt_rule_no_opinions)
-    "Cash on delivery" -> stringResource(R.string.opt_pay_cod)
-    "Bank transfer" -> stringResource(R.string.opt_pay_transfer)
-    "Cash" -> stringResource(R.string.opt_pay_cash)
-    "Full name" -> stringResource(R.string.opt_info_name)
-    "City" -> stringResource(R.string.opt_info_city)
-    "Address" -> stringResource(R.string.opt_info_address)
-    "Phone number" -> stringResource(R.string.opt_info_phone)
-    "Email address" -> stringResource(R.string.opt_info_email)
-    else -> value
-}
-
-/** Single-select chips. */
-@Composable
-private fun ChoiceRow(
-    label: String,
-    options: List<String>,
-    selected: String,
-    onSelect: (String) -> Unit,
-) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach {
-            FilterChip(
-                selected = selected.equals(it, ignoreCase = true),
-                onClick = { onSelect(it) },
-                label = { Text(optionLabel(it)) },
-            )
-        }
-    }
-    Spacer(Modifier.height(8.dp))
-}
-
-/** Multi-select chips. */
-@Composable
-private fun MultiChoice(
-    label: String,
-    options: List<String>,
-    selected: List<String>,
-    onToggle: (String) -> Unit,
-) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach {
-            FilterChip(
-                selected = it in selected,
-                onClick = { onToggle(it) },
-                label = { Text(optionLabel(it)) },
-            )
-        }
-    }
-    Spacer(Modifier.height(8.dp))
-}
-
-private fun List<String>.toggle(value: String) =
-    if (value in this) this - value else this + value
 
 /**
  * Opens a Chrome Custom Tab — an in-app browser overlay rather than a jump to Chrome, so the

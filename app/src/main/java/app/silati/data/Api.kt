@@ -38,6 +38,18 @@ interface SilatiApi {
     @GET("api/mobile/me")
     suspend fun me(@Header("Authorization") bearer: String): MeResponse
 
+    /**
+     * Creates the user's first business. Runs once per account — a second call is a 409,
+     * which is the backend's guard against a retry creating two businesses.
+     *
+     * The AI brief is never sent: the backend derives it from these answers.
+     */
+    @POST("api/mobile/onboarding")
+    suspend fun onboard(
+        @Header("Authorization") bearer: String,
+        @Body body: Onboarding,
+    ): OnboardingResponse
+
     /** One assistant turn: the whole conversation in, the whole conversation back. */
     @POST("api/mobile/chat")
     suspend fun chat(
@@ -201,6 +213,10 @@ data class DeviceRegistration(
 
 @Serializable
 data class InstagramConnectUrl(val url: String, val expiresAt: String? = null)
+
+/** Ignored in practice — the app re-reads /me afterwards, which is the shape it uses. */
+@Serializable
+data class OnboardingResponse(val business: ApiBusiness? = null)
 
 @Serializable
 data class SettingsPatchResponse(val user: ApiUser? = null)

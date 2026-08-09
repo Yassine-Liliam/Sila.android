@@ -94,9 +94,10 @@ All behind one Bearer check, each reusing `lib/ai-tools.ts`, `lib/business.ts` a
 - **Read screens** — Products, Clients, Chats, Purchases, Deliveries all list, paginate and
   open a detail sheet. Purchases and Deliveries filter by status; Products and Clients search.
 
-Every screen except Settings is wired. Still missing: **write actions** (Phase 6 — confirm /
-cancel an order, pause a conversation, edit a product), **Settings**, and **onboarding
-(Phase 3, skipped)** — a brand-new owner still has to start on the web.
+Every screen is wired, including onboarding, write actions, Settings and push — a new owner
+can install the app and get all the way to a working business without touching the website.
+What's left is not features: the **visual design pass (Phase 10)**, polish (11) and the
+Play Store (12).
 
 ## Known issues
 
@@ -147,9 +148,31 @@ The setup tax was the whole cost: `serverClientId` must be the **Web** client (n
 Android one — that mistake is the `28444` in Resolved issues), and the app's SHA-1 must be
 registered in Google Cloud.
 
-### Phase 3 — Onboarding
-The 5-step wizard, native. A first-time owner installs the app, gets onboarded, and is in —
-no detour through the website. "Onboarded" stays `user has ≥ 1 Business`, same as the web.
+### ~~Phase 3 — Onboarding~~ ✅ *(done 2026-08-09, last of the functional phases)*
+The 5-step wizard, native (`OnboardingScreen.kt`). A first-time owner installs the app, gets
+onboarded, and is in — no detour through the website. "Onboarded" stays `user has ≥ 1
+Business`, same as the web, so the gate is just `Session.business != null`.
+
+**It reuses Settings' controls rather than its own.** Both screens ask the same questions —
+Settings edits the answers this screen collects — so the field composables moved to
+`ui/AnswerFields.kt`. A field added in one place now shows up in both, which is the failure
+this avoids: the two drifting until only one knows about a question.
+
+**Steps are an `Int` and a `when`**, per the repo's nav rule, with one `BackHandler`. Same
+call made in Phase 6b and for the same reason: no back stack, no arguments, no deep link.
+
+Three things worth keeping:
+- **The screen never composes the AI brief** — it posts the answers and the backend derives
+  `businessProfile`. Same rule as Settings, same reason.
+- **`delivers` starts null and blocks the step until answered.** Everything else has a
+  sensible default, but this one gates whether confirming an order creates a delivery, so a
+  silently-defaulted "no" would break deliveries in a way the owner can't see from the app.
+- **Language defaults to the device's** and stays a question. The app has no language picker
+  (the platform provides one), but the *business* language is a business decision, not a
+  phone setting.
+
+Not done: the answers are plain `remember`, so a **rotation mid-wizard loses them** (the step
+itself is saveable). Same gap as the assistant conversation, same fix — a `Saver`.
 
 ### ~~Phase 4 — Assistant screen~~ ✅ *(done 2026-08-08, before Phase 3)*
 Chat against `api/mobile/chat` with the full owner tool set. **Ephemeral by design** — the
@@ -181,7 +204,10 @@ Detail is a bottom sheet, not a destination: the list response already carries e
 so opening one costs no request and needs no back stack. **Phase 6 is where that stops being
 true** — an edit form wants real navigation, and that is the moment to add navigation-compose.
 
-### Phase 6 — Write actions
+### ~~Phase 6 — Write actions~~ ✅ *(done 2026-08-08)*
+
+Both sub-phases below. The one thing not built is the **product image picker** — tracked in
+Phase 11, since it's a gap in a shipped screen rather than unfinished work here.
 
 **6a — one-tap actions** ✅ *(done 2026-08-08)*
 Confirm/cancel a purchase, pause/resume a conversation, set a delivery's status. No forms and
@@ -266,9 +292,21 @@ the manifest give the app a per-app Language entry in Android Settings (13+); be
 follows the system language. The platform already has the picker — the web app needs its own
 because the browser has none.
 
-### ~~Phase 9 — Push notifications~~ ✅ *(done 2026-08-08)*
-FCM: new DM, new pending order. The one thing the web genuinely cannot do, and the reason an
-owner keeps the app installed.
+### ~~Phase 9 — Push notifications~~ ✅ *(done 2026-08-08, verified on device 2026-08-09)*
+FCM: **new pending order**. The one thing the web genuinely cannot do, and the reason an owner
+keeps the app installed.
+
+Inbound DMs were pushed too at first and it was wrong — the AI answers them, so every message
+buzzed for nothing. That push was cut 2026-08-09; an order is the only event that actually
+needs the owner. Restoring a DM push (gated on the conversation being paused) is the obvious
+next lever if human-takeover threads should buzz.
+
+**Chasing the first missing order push found a prompt bug, not a push bug**: the owner's AI
+rule *"Confirm order details before closing"* collided with the DM prompt's hardcoded "never
+confirm an order yourself", so the AI recapped the order and then waited forever without
+calling `record_order`. Fixed in `lib/ai-reply.ts` in the Next repo. Worth remembering when
+push "doesn't work": the notification is downstream of a tool call that may never have run —
+check the Purchases list before touching FCM.
 
 **Setup that isn't in this repo:** a Firebase project (`silati-2b4b5`) with `app.silati`
 registered, `app/google-services.json` committed, and the matching **service-account JSON**
@@ -406,6 +444,8 @@ For a physical phone: Settings → About phone → Software information → tap 
 |---|---|
 | `app/src/main/java/app/silati/MainActivity.kt` | Entry point, session gate (loading / signed-out / ready / failed), drawer navigation. |
 | `app/src/main/java/app/silati/SignIn.kt` | Credential Manager sign-in; `WEB_CLIENT_ID` is the **Web** OAuth client, i.e. the token's `aud`. |
+| `app/src/main/java/app/silati/OnboardingScreen.kt` | First-run setup: five steps as an `Int` and a `when`, creating the owner's first business. |
+| `app/src/main/java/app/silati/ui/AnswerFields.kt` | The controls that edit onboarding answers — shared by Onboarding and Settings so a new question lands in both. |
 | `app/src/main/java/app/silati/AssistantScreen.kt` | The assistant chat: bubbles, tool lines, composer. |
 | `app/src/main/java/app/silati/data/Api.kt` | Retrofit service + wire types, and the OkHttp timeouts. Optional fields carry defaults and unknown keys are ignored, so a backend change can't crash the app. |
 | `app/src/main/java/app/silati/data/Chat.kt` | Chat wire types (content stays raw JSON) and the flattening into displayable items. |
@@ -417,7 +457,7 @@ For a physical phone: Settings → About phone → Software information → tap 
 | `app/src/main/java/app/silati/data/Session.kt` | Owns the token; exchanges the Google ID token, restores on launch, maps failures to offline / signed-out / failed. |
 | `app/src/main/java/app/silati/data/TokenStore.kt` | Session token at rest: AES-256-GCM with the key in Android Keystore. |
 | `app/src/main/java/app/silati/ui/theme/` | Material 3 theme — dynamic color on 12+, cyan-seeded fallback below. |
-| `app/src/main/res/values/strings.xml` | All user-facing strings (`values-fr` / `values-ar` land in Phase 8). |
+| `app/src/main/res/values/strings.xml` | All user-facing strings; `values-fr` / `values-ar` are complete. |
 | `gradle/libs.versions.toml` | Dependency versions (version catalog). |
 
 ## Conventions

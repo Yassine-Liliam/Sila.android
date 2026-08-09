@@ -150,7 +150,22 @@
 
     <string name="loading">جارٍ التحميل…</string>
     <string name="retry">إعادة المحاولة</string>
-    <string name="not_onboarded">أكمل إعداد نشاطك التجاري على silati.app، ثم أعد فتح التطبيق.</string>
+
+    <string name="onboarding_step">الخطوة %1$d من %2$d</string>
+    <string name="onboarding_intro">بضعة أسئلة، حتى يجيب الذكاء الاصطناعي على عملائك كما تفعل أنت.</string>
+    <string name="onboarding_step_business">نشاطك التجاري</string>
+    <string name="onboarding_step_ai">كيف يرد الذكاء الاصطناعي</string>
+    <string name="onboarding_step_delivery">التوصيل والدفع</string>
+    <string name="onboarding_step_orders">تأكيد الطلبات</string>
+    <string name="onboarding_step_policies">الشروط</string>
+    <string name="field_your_name">اسمك</string>
+    <string name="field_language">لغة النشاط التجاري</string>
+    <string name="field_delivers_question">هل توصّل الطلبات؟</string>
+    <string name="field_delivery_instructions">تعليمات التوصيل</string>
+    <string name="action_next">التالي</string>
+    <string name="action_finish">إنهاء</string>
+    <string name="action_yes">نعم</string>
+    <string name="action_no">لا</string>
 
     <!-- Labels only: the stored values stay English (see values/strings.xml). -->
     <string name="opt_lang_english">الإنجليزية</string>

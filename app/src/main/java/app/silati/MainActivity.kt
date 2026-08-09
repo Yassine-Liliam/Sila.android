@@ -180,29 +180,41 @@ private fun SilatiRoot(
             },
         )
 
-        is UiState.Ready -> SilatiApp(
-            session = current.session,
-            onSignOut = {
-                scope.launch {
-                    // Unregister BEFORE clearing the session — the request needs that token,
-                    // and a signed-out phone that keeps buzzing is worse than no push at all.
-                    runCatching { repos.push.unregister() }
-                    sessions.signOut()
-                    chatMessages = emptyList() // don't leave one owner's chat for the next
+        // A brand-new owner has no business yet, so no screen has anything to show and the
+        // assistant's tools would all fail the server's not-onboarded guard: set up first.
+        is UiState.Ready -> if (!current.session.onboarded) {
+            OnboardingScreen(
+                sessions = sessions,
+                userName = current.session.user.name,
+                onDone = { state = UiState.Ready(it) },
+                onSignedOut = { state = UiState.SignedOut },
+            )
+        } else {
+            SilatiApp(
+                session = current.session,
+                onSignOut = {
+                    scope.launch {
+                        // Unregister BEFORE clearing the session — the request needs that
+                        // token, and a signed-out phone that keeps buzzing is worse than no
+                        // push at all.
+                        runCatching { repos.push.unregister() }
+                        sessions.signOut()
+                        chatMessages = emptyList() // don't leave one owner's chat for the next
+                        state = UiState.SignedOut
+                    }
+                },
+                // The token was already cleared server-side or locally; drop to sign-in.
+                onSignedOut = {
+                    chatMessages = emptyList()
                     state = UiState.SignedOut
-                }
-            },
-            // The token was already cleared server-side or locally; drop to sign-in.
-            onSignedOut = {
-                chatMessages = emptyList()
-                state = UiState.SignedOut
-            },
-            repos = repos,
-            chatMessages = chatMessages,
-            onChatMessagesChange = { chatMessages = it },
-            tappedDestination = tappedDestination,
-            onDestinationHandled = onDestinationHandled,
-        )
+                },
+                repos = repos,
+                chatMessages = chatMessages,
+                onChatMessagesChange = { chatMessages = it },
+                tappedDestination = tappedDestination,
+                onDestinationHandled = onDestinationHandled,
+            )
+        }
 
         is UiState.Failed -> ErrorScreen(
             message = current.detail ?: stringResource(current.message),
@@ -352,13 +364,7 @@ fun SilatiApp(
             },
         ) { innerPadding ->
             when {
-                // An owner with no business has nothing for any screen to show, and the
-                // assistant's tools would all fail on the server's not-onboarded guard.
-                session?.onboarded == false -> Placeholder(
-                    text = stringResource(R.string.not_onboarded),
-                    modifier = Modifier.padding(innerPadding),
-                )
-
+                // Not-onboarded never reaches here — SilatiRoot routes it to OnboardingScreen.
                 current == Dest.Assistant && repos != null -> AssistantScreen(
                     messages = chatMessages,
                     onMessagesChange = onChatMessagesChange,
