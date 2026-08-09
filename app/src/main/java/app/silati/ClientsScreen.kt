@@ -1,5 +1,6 @@
 package app.silati
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,6 +81,9 @@ fun ClientsScreen(
                 itemKey = { it.id },
                 emptyText = stringResource(R.string.clients_empty),
                 emptyTextWhenFiltered = stringResource(R.string.clients_no_match),
+                emptyIcon = Icons.Default.Person,
+                emptyActionLabel = stringResource(R.string.client_new),
+                onEmptyAction = { editing = Editing(null) },
                 onSignedOut = onSignedOut,
                 reloadKey = reloadKey,
             ) { client ->
@@ -118,6 +128,32 @@ fun ClientsScreen(
     }
 }
 
+/**
+ * The client's initial, so a list of names has something to anchor the eye at the leading
+ * edge — the same job the thumbnail does on Products.
+ *
+ * Decorative: the name is right beside it, so a screen reader announcing the letter as well
+ * would only repeat what it is about to read.
+ */
+@Composable
+private fun Avatar(name: String) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            // First letter of the name, uppercased in the *display* locale: Arabic and French
+            // names both go through here, and the value itself is never touched.
+            text = name.trim().take(1).uppercase(),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+    }
+}
+
 @Composable
 private fun ClientRow(client: Client, onClick: () -> Unit) {
     EntityRow(onClick) {
@@ -125,6 +161,8 @@ private fun ClientRow(client: Client, onClick: () -> Unit) {
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Avatar(client.name)
+            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = client.name,

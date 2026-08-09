@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -71,6 +73,8 @@ fun PurchasesScreen(
             itemKey = { it.id },
             emptyText = stringResource(R.string.purchases_empty),
             emptyTextWhenFiltered = stringResource(R.string.purchases_no_match),
+            // No action: orders come from the DM AI or the assistant, never a form here.
+            emptyIcon = Icons.AutoMirrored.Filled.List,
             onSignedOut = onSignedOut,
             reloadKey = reloadKey,
         ) { purchase ->

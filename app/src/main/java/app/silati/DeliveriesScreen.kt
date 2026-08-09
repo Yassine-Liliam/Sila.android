@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +36,7 @@ import app.silati.data.SessionError
 import app.silati.ui.PagedList
 import app.silati.ui.SheetError
 import app.silati.ui.StatusChip
+import app.silati.ui.StatusDot
 import app.silati.ui.Tone
 import app.silati.ui.dateTime
 import app.silati.ui.relativeTime
@@ -69,6 +73,8 @@ fun DeliveriesScreen(
             itemKey = { it.id },
             emptyText = stringResource(R.string.deliveries_empty),
             emptyTextWhenFiltered = stringResource(R.string.deliveries_no_match),
+            // No action: confirming a purchase is what creates a delivery.
+            emptyIcon = Icons.Default.Place,
             onSignedOut = onSignedOut,
             reloadKey = reloadKey,
         ) { delivery ->
@@ -184,6 +190,10 @@ private fun DeliveryRow(delivery: Delivery, onClick: () -> Unit) {
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Repeats the chip's meaning on the leading edge, where a column of dots reads as
+            // "what still needs me" without having to read any of the words.
+            StatusDot(deliveryTone(delivery.status))
+            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = delivery.client?.name ?: stringResource(R.string.unknown_client),

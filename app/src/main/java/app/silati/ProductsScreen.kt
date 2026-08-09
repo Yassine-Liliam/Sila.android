@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -96,6 +97,9 @@ fun ProductsScreen(
                 itemKey = { it.id },
                 emptyText = stringResource(R.string.products_empty),
                 emptyTextWhenFiltered = stringResource(R.string.products_no_match),
+                emptyIcon = Icons.Default.ShoppingCart,
+                emptyActionLabel = stringResource(R.string.product_new),
+                onEmptyAction = { editing = Editing(null) },
                 onSignedOut = onSignedOut,
                 reloadKey = reloadKey,
             ) { product ->
@@ -210,7 +214,9 @@ private fun ProductDetail(product: Product, onEdit: () -> Unit) {
         product.imageUrl?.let {
             AsyncImage(
                 model = absoluteUrl(it),
-                contentDescription = null,
+                // Described, unlike the row thumbnail: this one is the subject of the sheet,
+                // not decoration beside a name that's already being read out.
+                contentDescription = stringResource(R.string.product_photo_of, product.name),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()

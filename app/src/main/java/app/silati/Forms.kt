@@ -1,7 +1,13 @@
 package app.silati
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +27,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +36,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +51,9 @@ import app.silati.data.Product
 import app.silati.data.ProductInput
 import app.silati.data.ProductRepository
 import app.silati.data.SessionError
+import app.silati.data.absoluteUrl
+import app.silati.data.encodeImage
+import coil3.compose.AsyncImage
 import app.silati.ui.ButtonSpinner
 import app.silati.ui.SheetError
 import app.silati.ui.rememberSheetActionState
@@ -53,10 +69,6 @@ import kotlinx.coroutines.launch
  * navigation-compose would mean restructuring working navigation to gain nothing.
  * ponytail: revisit when something needs a deep link (a push notification opening an order
  * is the likely trigger) — that's a real back stack and the library earns its place then.
- *
- * ponytail: no image picking, so a product photo still has to be set from the web. The
- * backend already accepts `image: { data, mediaType }` on both routes — it needs a
- * PickVisualMedia launcher and base64, not a protocol change.
  */
 
 /** Shared chrome: scrolling body, Save / Cancel, busy and error handling. */
@@ -158,11 +170,26 @@ fun ProductForm(
     var stock by remember { mutableStateOf(initial?.stock?.toString().orEmpty()) }
     var currency by remember { mutableStateOf(initial?.currency ?: "MAD") }
     var active by remember { mutableStateOf(initial?.active ?: true) }
+    // The picked photo is held as a Uri, not as bytes: it previews straight from the Uri and
+    // the encode (decode, downscale, base64) happens off the main thread at save time.
+    var picked by remember { mutableStateOf<Uri?>(null) }
+    var removeImage by remember { mutableStateOf(false) }
 
     val action = rememberSheetActionState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val offlineText = stringResource(R.string.sign_in_offline)
     val failedText = stringResource(R.string.action_failed)
+    val imageFailedText = stringResource(R.string.image_failed)
+
+    val picker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            picked = uri
+            removeImage = false
+        }
+    }
 
     // Mirrors the server: name required, price a number >= 0.
     val priceValid = price.trim().toDoubleOrNull()?.let { it >= 0 } == true
@@ -179,15 +206,25 @@ fun ProductForm(
         onSave = {
             action.busy = true
             action.error = null
-            val input = ProductInput(
-                name = name.trim(),
-                price = price.trim(),
-                description = description.trim(),
-                stock = stock.trim(),
-                currency = currency.trim().ifBlank { "MAD" },
-                active = active,
-            )
             scope.launch {
+                val chosen = picked
+                val image = if (chosen != null) encodeImage(context, chosen) else null
+                if (chosen != null && image == null) {
+                    // Unreadable or undecodable: say so rather than silently saving the rest.
+                    action.error = imageFailedText
+                    action.busy = false
+                    return@launch
+                }
+                val input = ProductInput(
+                    name = name.trim(),
+                    price = price.trim(),
+                    description = description.trim(),
+                    stock = stock.trim(),
+                    currency = currency.trim().ifBlank { "MAD" },
+                    active = active,
+                    image = image,
+                    removeImage = if (removeImage && image == null) true else null,
+                )
                 runCatching {
                     if (initial == null) products.create(input)
                     else products.update(initial.id, input)
@@ -203,6 +240,19 @@ fun ProductForm(
         },
         modifier = modifier,
     ) {
+        ProductImageField(
+            picked = picked,
+            existing = initial?.imageUrl?.takeUnless { removeImage },
+            onPick = {
+                picker.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            onRemove = {
+                picked = null
+                removeImage = true
+            },
+        )
         FormField(name, { name = it }, stringResource(R.string.field_name))
         FormField(
             value = price,
@@ -247,6 +297,68 @@ fun ProductForm(
                 )
             }
             Switch(checked = active, onCheckedChange = { active = it })
+        }
+    }
+}
+
+/**
+ * The photo row: preview, pick, and remove.
+ *
+ * @param picked a just-chosen image, previewed straight from its Uri — Coil reads `content://`
+ *   as happily as `https://`, so nothing has to be decoded to show it.
+ * @param existing the product's stored image, already cleared by the caller when removal is
+ *   pending, so this composable never has to know which of the two states wins.
+ */
+@Composable
+private fun ProductImageField(
+    picked: Uri?,
+    existing: String?,
+    onPick: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    val shape = RoundedCornerShape(12.dp)
+    val model: Any? = picked ?: existing?.let { absoluteUrl(it) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (model == null) {
+            Box(
+                modifier = Modifier
+                    .size(88.dp)
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+            )
+        } else {
+            AsyncImage(
+                model = model,
+                contentDescription = stringResource(R.string.image_current),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(88.dp)
+                    .clip(shape),
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Column {
+            OutlinedButton(onClick = onPick) {
+                Text(
+                    stringResource(
+                        if (model == null) R.string.image_add else R.string.image_change
+                    )
+                )
+            }
+            if (model != null) {
+                TextButton(onClick = onRemove) {
+                    Text(
+                        text = stringResource(R.string.image_remove),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
         }
     }
 }

@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,6 +81,8 @@ fun ConversationsScreen(
         // Covers both "no Instagram connected" and "connected, nobody has written yet" —
         // the action is the same either way, and connecting is a web-only flow.
         emptyText = stringResource(R.string.conversations_empty),
+        // No action: a DM thread starts when a customer writes, not when the owner taps.
+        emptyIcon = Icons.Default.MailOutline,
         onSignedOut = onSignedOut,
         modifier = modifier,
         reloadKey = reloadKey,

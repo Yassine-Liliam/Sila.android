@@ -68,9 +68,9 @@ fun OnboardingScreen(
     modifier: Modifier = Modifier,
 ) {
     val steps = 5
-    // Saveable, so a rotation doesn't jump back to step 1.
-    // ponytail: the answers themselves are plain `remember` and don't survive rotation —
-    // same known gap as the assistant conversation. A Saver over `Onboarding` fixes both.
+    // Every answer is saveable: a rotation part-way through the wizard used to empty the form,
+    // which is the worst possible moment to lose typing. Strings, booleans and lists of
+    // strings all go into the Bundle as they are, so no custom Saver is needed.
     var step by rememberSaveable { mutableIntStateOf(1) }
 
     // The device language is the honest default for a business that just installed a phone
@@ -83,26 +83,26 @@ fun OnboardingScreen(
         }
     }
 
-    var name by remember { mutableStateOf(userName.orEmpty()) }
-    var businessName by remember { mutableStateOf("") }
-    var sells by remember { mutableStateOf("") }
-    var story by remember { mutableStateOf("") }
-    var language by remember { mutableStateOf(deviceLanguage) }
-    var aiLanguage by remember { mutableStateOf(deviceLanguage) }
-    var tone by remember { mutableStateOf("professional") } // the web wizard's default
-    var rules by remember { mutableStateOf(emptyList<String>()) }
+    var name by rememberSaveable { mutableStateOf(userName.orEmpty()) }
+    var businessName by rememberSaveable { mutableStateOf("") }
+    var sells by rememberSaveable { mutableStateOf("") }
+    var story by rememberSaveable { mutableStateOf("") }
+    var language by rememberSaveable { mutableStateOf(deviceLanguage) }
+    var aiLanguage by rememberSaveable { mutableStateOf(deviceLanguage) }
+    var tone by rememberSaveable { mutableStateOf("professional") } // the web wizard's default
+    var rules by rememberSaveable { mutableStateOf(emptyList<String>()) }
     // Null until answered: this gates whether confirming an order creates a delivery, so a
     // silent default would break deliveries in a way the owner can't see.
-    var delivers by remember { mutableStateOf<Boolean?>(null) }
-    var deliveryAreas by remember { mutableStateOf("") }
-    var pickupAddress by remember { mutableStateOf("") }
-    var payment by remember { mutableStateOf(emptyList<String>()) }
-    var phone by remember { mutableStateOf("") }
-    var confirmInfo by remember { mutableStateOf(emptyList<String>()) }
-    var deliveryInstructions by remember { mutableStateOf("") }
-    var returnsAccepted by remember { mutableStateOf(false) }
-    var returnDays by remember { mutableStateOf("7") }
-    var otherPolicies by remember { mutableStateOf("") }
+    var delivers by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    var deliveryAreas by rememberSaveable { mutableStateOf("") }
+    var pickupAddress by rememberSaveable { mutableStateOf("") }
+    var payment by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var phone by rememberSaveable { mutableStateOf("") }
+    var confirmInfo by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var deliveryInstructions by rememberSaveable { mutableStateOf("") }
+    var returnsAccepted by rememberSaveable { mutableStateOf(false) }
+    var returnDays by rememberSaveable { mutableStateOf("7") }
+    var otherPolicies by rememberSaveable { mutableStateOf("") }
 
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }

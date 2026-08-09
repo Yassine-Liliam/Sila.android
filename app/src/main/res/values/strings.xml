@@ -23,6 +23,10 @@
 
     <string name="assistant_empty">How can I help?</string>
     <string name="assistant_empty_hint">Ask about your products, orders or deliveries — or tell me what to change.</string>
+    <!-- Tapped to send as-is, so they must read as something an owner would actually type. -->
+    <string name="assistant_suggestion_sales">What did I sell today?</string>
+    <string name="assistant_suggestion_pending">Which orders are waiting for me?</string>
+    <string name="assistant_suggestion_product">Add a new product</string>
     <string name="assistant_hint">Message</string>
     <string name="assistant_send">Send</string>
     <string name="assistant_failed">The assistant couldn\'t answer. Try again.</string>
@@ -30,7 +34,7 @@
     <string name="assistant_tool">⚙ %1$s</string>
 
     <string name="products_search">Search products</string>
-    <string name="products_empty">No products yet. Ask the assistant to add one.</string>
+    <string name="products_empty">Your catalogue is empty. Add what you sell so the AI can quote it to customers.</string>
     <string name="products_no_match">No product matches that search.</string>
     <string name="product_inactive">Not for sale</string>
     <string name="product_inactive_explained">Not for sale — hidden from customers and the AI.</string>
@@ -82,6 +86,13 @@
     <string name="field_description">Description</string>
     <string name="field_active">For sale</string>
     <string name="field_active_hint">Off hides it from customers and the AI, keeping past orders intact.</string>
+    <string name="image_add">Add a photo</string>
+    <string name="image_change">Change photo</string>
+    <string name="image_remove">Remove</string>
+    <string name="image_failed">That image couldn\'t be read. Try another one.</string>
+    <string name="image_current">Product photo</string>
+    <!-- %1$s is the product name -->
+    <string name="product_photo_of">Photo of %1$s</string>
 
     <string name="settings_profile">Profile</string>
     <string name="settings_business">Business</string>

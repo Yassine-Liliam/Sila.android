@@ -249,7 +249,15 @@ data class ProductInput(
     val stock: String? = null,
     val currency: String? = null,
     val active: Boolean? = null,
+    /** A new photo. The backend validates and stores it; we never send a URL. */
+    val image: ImageInput? = null,
+    /** PATCH only, and only meaningful without [image] — a new photo wins over removal. */
+    val removeImage: Boolean? = null,
 )
+
+/** Base64 image bytes plus their media type, the shape every upload route expects. */
+@Serializable
+data class ImageInput(val data: String, val mediaType: String)
 
 /** Same omit-vs-empty rule as [ProductInput]. */
 @Serializable

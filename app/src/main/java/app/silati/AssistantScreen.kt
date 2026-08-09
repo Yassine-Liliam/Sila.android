@@ -3,6 +3,7 @@ package app.silati
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -85,8 +87,8 @@ fun AssistantScreen(
         if (items.isNotEmpty()) listState.animateScrollToItem(items.lastIndex)
     }
 
-    val send: () -> Unit = {
-        val text = input.trim()
+    val sendText: (String) -> Unit = { raw ->
+        val text = raw.trim()
         if (text.isNotEmpty() && !busy) {
             // Show the owner's turn immediately; the server echoes it back in the reply.
             val pending = messages + ChatMessage.user(text)
@@ -115,11 +117,12 @@ fun AssistantScreen(
             }
         }
     }
+    val send: () -> Unit = { sendText(input) }
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             if (items.isEmpty()) {
-                EmptyState()
+                EmptyState(onSuggestion = sendText)
             } else {
                 LazyColumn(
                     state = listState,
@@ -159,7 +162,7 @@ fun AssistantScreen(
 }
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(onSuggestion: (String) -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             // The launcher icon as a tile — same mark and same background colour, so the
@@ -191,6 +194,24 @@ private fun EmptyState() {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp),
             )
+            Spacer(Modifier.height(24.dp))
+            // Tapping one sends it straight away. They teach what the assistant can do far
+            // better than the hint above does — an owner who has never used it has no way to
+            // guess that "what did I sell today" is a question it can answer.
+            val suggestions = listOf(
+                stringResource(R.string.assistant_suggestion_sales),
+                stringResource(R.string.assistant_suggestion_pending),
+                stringResource(R.string.assistant_suggestion_product),
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = 24.dp),
+            ) {
+                suggestions.forEach {
+                    SuggestionChip(onClick = { onSuggestion(it) }, label = { Text(it) })
+                }
+            }
         }
     }
 }

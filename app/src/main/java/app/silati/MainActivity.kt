@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.silati.data.ChatMessage
+import app.silati.data.ChatMessagesSaver
 import app.silati.data.Repos
 import app.silati.data.Session
 import app.silati.data.SessionError
@@ -140,10 +141,11 @@ private fun SilatiRoot(
     val repos = remember { Repos(context.applicationContext) }
 
     // Held here, above the drawer's destination switch, so leaving the assistant for another
-    // screen and coming back keeps the conversation.
-    // ponytail: plain remember, so a rotation still clears it. Survives navigation, which is
-    // the case that actually happens; a Saver over the raw JSON would fix the rest.
-    var chatMessages by remember { mutableStateOf<List<ChatMessage>>(emptyList()) }
+    // screen and coming back keeps the conversation — and saveable, so a rotation or the
+    // language switch (which recreates the activity) doesn't throw it away either.
+    var chatMessages by rememberSaveable(stateSaver = ChatMessagesSaver) {
+        mutableStateOf<List<ChatMessage>>(emptyList())
+    }
 
     // Re-runs when `attempt` changes, which is what the retry button bumps.
     LaunchedEffect(attempt) {

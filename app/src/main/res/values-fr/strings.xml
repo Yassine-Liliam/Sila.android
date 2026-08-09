@@ -21,13 +21,16 @@
 
     <string name="assistant_empty">Comment puis-je aider ?</string>
     <string name="assistant_empty_hint">Posez une question sur vos produits, commandes ou livraisons — ou dites-moi quoi modifier.</string>
+    <string name="assistant_suggestion_sales">Qu\'est-ce que j\'ai vendu aujourd\'hui ?</string>
+    <string name="assistant_suggestion_pending">Quelles commandes attendent ma confirmation ?</string>
+    <string name="assistant_suggestion_product">Ajouter un nouveau produit</string>
     <string name="assistant_hint">Message</string>
     <string name="assistant_send">Envoyer</string>
     <string name="assistant_failed">L\'assistant n\'a pas pu répondre. Réessayez.</string>
     <string name="assistant_tool">⚙ %1$s</string>
 
     <string name="products_search">Rechercher un produit</string>
-    <string name="products_empty">Aucun produit. Demandez à l\'assistant d\'en ajouter un.</string>
+    <string name="products_empty">Votre catalogue est vide. Ajoutez ce que vous vendez pour que l\'IA puisse le proposer à vos clients.</string>
     <string name="products_no_match">Aucun produit ne correspond.</string>
     <string name="product_inactive">Hors vente</string>
     <string name="product_inactive_explained">Hors vente — invisible pour les clients et pour l\'IA.</string>
@@ -77,6 +80,12 @@
     <string name="field_description">Description</string>
     <string name="field_active">En vente</string>
     <string name="field_active_hint">Désactivé, le produit est masqué aux clients et à l\'IA ; les commandes passées restent intactes.</string>
+    <string name="image_add">Ajouter une photo</string>
+    <string name="image_change">Changer la photo</string>
+    <string name="image_remove">Supprimer</string>
+    <string name="image_failed">Cette image n\'a pas pu être lue. Essayez-en une autre.</string>
+    <string name="image_current">Photo du produit</string>
+    <string name="product_photo_of">Photo de %1$s</string>
 
     <string name="settings_profile">Profil</string>
     <string name="settings_business">Entreprise</string>

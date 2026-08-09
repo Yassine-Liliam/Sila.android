@@ -1,7 +1,9 @@
 package app.silati.data
 
 import android.content.Context
+import androidx.compose.runtime.saveable.Saver
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -37,6 +39,25 @@ data class ChatMessage(val role: String, val content: JsonElement) {
         )
     }
 }
+
+/**
+ * Saves the conversation across activity recreation — a rotation, or the language switch,
+ * which recreates the activity by design.
+ *
+ * It round-trips through the same JSON the wire uses, which is the only lossless option: the
+ * blocks inside `content` are raw and get posted back verbatim, so anything a hand-written
+ * Saver failed to model would corrupt the history exactly as it would on the wire.
+ *
+ * ponytail: saved state goes in a Bundle, which dies past roughly 500KB. A long conversation
+ * with images could reach that; the fix when it happens is persisting to a file and saving
+ * only its name, not a smaller Saver.
+ */
+val ChatMessagesSaver: Saver<List<ChatMessage>, String> = Saver(
+    save = { runCatching { chatJson.encodeToString(it) }.getOrNull() },
+    restore = { runCatching { chatJson.decodeFromString<List<ChatMessage>>(it) }.getOrNull() },
+)
+
+private val chatJson = Json { ignoreUnknownKeys = true }
 
 @Serializable
 data class ChatRequest(val history: List<ChatMessage>)

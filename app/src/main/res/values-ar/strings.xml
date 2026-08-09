@@ -21,13 +21,16 @@
 
     <string name="assistant_empty">كيف يمكنني المساعدة؟</string>
     <string name="assistant_empty_hint">اسأل عن منتجاتك أو طلباتك أو عمليات التوصيل — أو أخبرني بما تريد تغييره.</string>
+    <string name="assistant_suggestion_sales">ماذا بعت اليوم؟</string>
+    <string name="assistant_suggestion_pending">ما الطلبات التي تنتظر تأكيدي؟</string>
+    <string name="assistant_suggestion_product">إضافة منتج جديد</string>
     <string name="assistant_hint">رسالة</string>
     <string name="assistant_send">إرسال</string>
     <string name="assistant_failed">تعذّر على المساعد الرد. حاول مرة أخرى.</string>
     <string name="assistant_tool">⚙ %1$s</string>
 
     <string name="products_search">ابحث عن منتج</string>
-    <string name="products_empty">لا توجد منتجات بعد. اطلب من المساعد إضافة واحد.</string>
+    <string name="products_empty">كتالوجك فارغ. أضف ما تبيعه ليتمكن الذكاء الاصطناعي من عرضه على عملائك.</string>
     <string name="products_no_match">لا يوجد منتج مطابق.</string>
     <string name="product_inactive">غير معروض للبيع</string>
     <string name="product_inactive_explained">غير معروض للبيع — مخفي عن الزبناء وعن الذكاء الاصطناعي.</string>
@@ -77,6 +80,12 @@
     <string name="field_description">الوصف</string>
     <string name="field_active">معروض للبيع</string>
     <string name="field_active_hint">عند الإيقاف يُخفى عن الزبناء وعن الذكاء الاصطناعي، مع الحفاظ على الطلبات السابقة.</string>
+    <string name="image_add">إضافة صورة</string>
+    <string name="image_change">تغيير الصورة</string>
+    <string name="image_remove">حذف</string>
+    <string name="image_failed">تعذّرت قراءة هذه الصورة. جرّب صورة أخرى.</string>
+    <string name="image_current">صورة المنتج</string>
+    <string name="product_photo_of">صورة %1$s</string>
 
     <string name="settings_profile">الملف الشخصي</string>
     <string name="settings_business">النشاط التجاري</string>
