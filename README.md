@@ -96,8 +96,9 @@ All behind one Bearer check, each reusing `lib/ai-tools.ts`, `lib/business.ts` a
 
 Every screen is wired, including onboarding, write actions, Settings and push — a new owner
 can install the app and get all the way to a working business without touching the website —
-and the visual design pass is done (Phase 10). What's left is **polish (Phase 11)** and the
-**Play Store (Phase 12)**.
+and the design (Phase 10) and polish (Phase 11) passes are done. **The only phase left is the
+Play Store (Phase 12)**: signing key, listing, screenshots. One thing carried into it: nothing
+has been run through TalkBack or a large-font setting yet.
 
 ## Known issues
 
@@ -386,53 +387,68 @@ Still open, deliberately:
 - **Icons** are still core-set picks (a shopping cart for products, a map pin for deliveries).
   Better ones live in `material-icons-extended`, a large dependency for cosmetics.
 
-### Phase 11 — Polish
+### ~~Phase 11 — Polish~~ ✅ *(done 2026-08-09)*
 
-Not a feature phase: everything here works, it just doesn't feel finished. This is the detail
-pass over whatever Phase 10 settles.
+Not a feature phase: everything already worked, it just didn't feel finished. Most of it
+landed in `ui/PagedList.kt`, which is the point of having one list implementation — five
+screens got each fix at once.
 
-Whatever the design pass decides, these stay true — they're about states, hierarchy, copy and
-correctness rather than looks.
-
-**Done**
-- ~~Dates and timestamps~~ ✅ 2026-08-08. Detail sheets showed raw ISO strings; lists showed
-  no dates at all. Now `ui/DateFormat.kt`: relative times in rows (platform-localised via
-  `DateUtils`), absolute date+time in sheets.
-
-**First impressions** — the two screens a new owner sees before anything else
-- **Sign-in** is a title, one line and a button. No illustration, no sense of what the app is.
-- **Assistant empty state** is bare text. Suggested first prompts ("What did I sell today?")
-  would both fill the space and teach what the assistant can do.
+**Dates and timestamps** ✅ *2026-08-08* — sheets showed raw ISO strings and lists showed no
+dates. `ui/DateFormat.kt`: relative times in rows (platform-localised via `DateUtils`),
+absolute date+time in sheets.
 
 **States**
-- Empty states are text-only everywhere — no icon, no action. Products even says "ask the
-  assistant" while a perfectly good **+** button sits in the corner.
-- Loading is a centred spinner on every list; skeleton rows would stop the layout jumping.
-- Errors are inline text. A snackbar with a Retry action is the Material pattern and would
-  make `PagedList`, the sheets and the forms behave the same way.
-- **No pull-to-refresh** on any list, which is the gesture people reach for first.
+- **Pull-to-refresh** on every list, reusing the same reload path as the retry button and a
+  write action — one way a list re-reads itself.
+- **Empty states** get an icon, and an action where the app can actually create the thing
+  (Products, Clients). Purchases, Deliveries and Conversations get none, because an order
+  comes from the AI, a delivery from confirming one, and a DM thread from a customer. A
+  *filtered* empty shows text only — offering "add one" after a fruitless search would create
+  something unrelated to what was typed.
+- **Skeleton rows** replace the centred spinner. Deliberately not shimmering: the animation is
+  the part that costs code, and the stillness is what fixed the layout jumping.
+- **Errors** with rows on screen show a **snackbar with Retry**. The `SnackbarHostState` lives
+  inside `PagedList`, so no screen has to plumb one down from the Scaffold.
 
 **Lists and rows**
-- Rows are flat: name and secondary line are nearly the same weight, so nothing anchors the
-  eye. Products has a thumbnail; the others have nothing on the leading edge (an avatar
-  initial for clients, a status dot for deliveries).
-- A write action re-fetches from page one, so **scroll position is lost** after confirming an
-  order far down the list (`reloadKey` in `ui/PagedList.kt`).
+- Clients get an initial **avatar**, deliveries a **status dot** on the leading edge; row
+  secondary text dropped to `bodySmall` in Phase 10, which is what stopped rows reading flat.
+- **Scroll position** is captured before a write re-fetch and restored after. ponytail: only
+  the first page is re-fetched, so this holds for a list that fits in one page and clamps
+  otherwise — the real fix is re-fetching as many pages as were loaded.
 
-**Gaps that read as bugs**
-- **No product image picker**, so a photo can only be set from the web. Both API routes
-  already accept `image: { data, mediaType }` — it needs `PickVisualMedia` and base64.
-- The assistant conversation **survives navigation but not rotation** (`MainActivity`), and
-  now also resets when the language is switched, since that recreates the activity. The
-  onboarding wizard's answers have the same gap. One `Saver` covers all three.
+**Product image picker** ✅ — a photo no longer has to be set from the web. `PickVisualMedia`
+(no new dependency), the Uri previewed straight by Coil, and `encodeImage()` in
+`data/Products.kt` doing the work at save time, off the main thread.
+
+**The downscale is what makes it work, not an optimisation.** A phone camera photo is
+routinely 4–12MB and the upload gate rejects anything over 5MB, so sending the original would
+fail for most real pictures. Sampled decode (so a 50MP original is never fully decoded),
+1600px long edge, JPEG 85. ponytail: JPEG for everything, so a PNG with transparency comes
+back on black — product photos are photographs.
+
+**Rotation** — the assistant conversation has a `Saver` that round-trips the same JSON the
+wire uses (lossless by construction, since the content blocks are raw and get posted back
+verbatim), and every wizard answer is `rememberSaveable`. Both now survive rotation *and* the
+language switch, which recreates the activity. ponytail: saved state goes in a Bundle, which
+dies past roughly 500KB — a long conversation with images could reach it, and the fix then is
+a file plus its name, not a smaller Saver.
+
+**First impressions** — the sign-in screen leads with the app mark instead of a bare word, and
+the assistant's empty state offers three tappable first prompts. They teach what it can do:
+an owner who has never used it has no way to guess "what did I sell today" is answerable.
 
 **Accessibility**
-- Product images pass `contentDescription = null`; decorative is arguable for a thumbnail,
-  wrong for the detail sheet's hero image.
-- Status colours in `StatusChip` are hardcoded hex and unchecked for contrast against dark
-  theme and dynamic colour — the one place where "it survives dynamic colour" was chosen over
-  "it matches the scheme". Phase 10 should decide whether that call still stands.
-- Nothing has been run through TalkBack or a large-font setting.
+- `StatusChip` text now flips with the theme — 700-level in light, 300/400 in dark. The single
+  hardcoded pair was dark-on-translucent, which is legible over white and nearly invisible
+  over black. The fills stay literal on purpose: order status must survive dynamic colour
+  repainting the scheme from the owner's wallpaper.
+- The product detail hero is described ("Photo of X"); row thumbnails stay `null`, decorative
+  beside a name that is about to be read out anyway.
+
+**Still not done:** nothing has been run through **TalkBack or a large-font setting**. That is
+a device pass with no code to write until it finds something — worth doing before Phase 12,
+since the Play listing is screenshots of these screens.
 
 ### Phase 12 — Play Store
 Signing key, app icon, privacy-policy link, screenshots, listing.
@@ -481,7 +497,8 @@ For a physical phone: Settings → About phone → Software information → tap 
 | `app/src/main/java/app/silati/data/Paging.kt` | `Page<T>` — the envelope every list route returns. |
 | `app/src/main/java/app/silati/data/Entities.kt` | Client / Conversation / Purchase / Delivery read models + repositories. |
 | `app/src/main/java/app/silati/data/Repos.kt` | All repositories, built once and passed down (no DI framework). |
-| `app/src/main/java/app/silati/ui/PagedList.kt` | The list machinery all five screens share, plus `StatusChip`. |
+| `app/src/main/java/app/silati/ui/PagedList.kt` | The list machinery all five screens share: paging, pull-to-refresh, skeletons, empty/error states, the Retry snackbar, plus `StatusChip` / `StatusDot`. |
+| `app/src/main/java/app/silati/Forms.kt` | Product and client create/edit, including the photo picker. |
 | `app/src/main/java/app/silati/{Products,Clients,Conversations,Purchases,Deliveries}Screen.kt` | The five entity screens. Shared row/sheet furniture lives in `ProductsScreen.kt`. |
 | `app/src/main/java/app/silati/data/Session.kt` | Owns the token; exchanges the Google ID token, restores on launch, maps failures to offline / signed-out / failed. |
 | `app/src/main/java/app/silati/data/TokenStore.kt` | Session token at rest: AES-256-GCM with the key in Android Keystore. |
